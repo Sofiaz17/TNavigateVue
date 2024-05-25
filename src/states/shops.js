@@ -21,7 +21,7 @@ async function fetchShopsName(name){
 }
 
 async function fetchCategories(){
-    categories.values = await (await fetch(CATEG_URL)).json()
+    categories.value = await (await fetch(CATEG_URL)).json()
 }
 
 async function fetchShopsCateg(category){
