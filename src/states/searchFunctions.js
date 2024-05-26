@@ -126,21 +126,8 @@ function capitalizeFirstLetter(string) {
     //return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-const visible = ref(false)
+async function viewInformation(shop){
+    
+}  
 
-async function toggleShops() {
-  if (!visible.value) {
-    await loadShops();
-  }
-  visible.value = !visible.value;
-}
-
-async function toggleCategories() {
-    if (!visible.value) {
-      await loadCategories();
-    }
-    visible.value = !visible.value;
-  }
-  
-
-export {loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat, toggleShops, toggleCategories, /*shopCount,*/ warningMessage, searchSC}
+export {loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops, *//*toggleCategories, *//*shopCount,*/ warningMessage, searchSC}
