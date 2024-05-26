@@ -7,9 +7,19 @@ const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 const warningMessage = ref('')
 const searchSC = ref('')
 
+async function clearSearchSC(){
+    return searchSC.value = ''
+}
+async function clearShops(){
+    return shops.value = ''
+}
+async function clearWarning(){
+    return warningMessage.value = ''
+}
 
 
 async function loadShops(){
+    //clearShops();
     try{
       await fetchShops();
       console.log('shops in map: ' + shops.value);
@@ -89,7 +99,7 @@ async function searchShopByName(categToSearch){
                 console.log('userinput in fetch name: ',capitalizeFirstLetter(searchSC.value));
         try{
           await fetchShopsName(capitalizeFirstLetter(searchSC.value));
-                console.log('shops.value: ' + shops.value[0].name);
+                //console.log('shops.value: ' + shops.value[0].name);
                 console.log('shops.value.length: ' + shops.value.length);
                 
           if(shops.value.length == undefined){
@@ -115,17 +125,18 @@ async function searchShopByProduct(categToSearch){
   }
   warningMessage.value = ''
  try{
-    if(categToSearch==undefined){
+    console.log('SEARCHBYPROD categtosearch: ' + categToSearch);
+    //if(categToSearch==undefined){
         categToSearch = await prodCategory();
             console.log('categToSearch value:'+ categToSearch);
             console.log('PROD searchSC.value:'+ searchSC.value);
+   // }
+    console.log('PROD, products.value.length: ' + products.value.length);
+    if(products.value.length === 0){
+        warningMessage.value = 'Nessun risultato';
+        return;
     }
-    
-    // if(products.value.length == undefined){
-    //     warningMessage.value = 'Nessun risultato';
-    //     return;
-    // }
-    //     warningMessage.value = '';   
+        warningMessage.value = '';   
         
     searchShopByName(categToSearch);
     
@@ -154,10 +165,10 @@ async function searchShopByProduct(categToSearch){
 
 async function prodCategory(){
     try{
-        await fetchProdName(searchSC.value);
+        await fetchProdName(searchSC.value.toLowerCase());
         console.log('products: ' + products.value);
         console.log('products.value[0]: ' + products.value[0]);
-        if(products.value.length == undefined){
+        if(products.value.length === 0){
             warningMessage.value = 'Nessun risultato';
             return;
         }
@@ -217,4 +228,4 @@ function capitalizeFirstLetter(string) {
 }
 
 
-export {loadShops, loadCategories, isCategory, searchShopByProduct, prodCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops, *//*toggleCategories, *//*shopCount,*/ warningMessage, searchSC}
+export {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, isCategory, searchShopByProduct, prodCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops, *//*toggleCategories, *//*shopCount,*/ warningMessage, searchSC}

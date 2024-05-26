@@ -1,5 +1,5 @@
 <script setup>
-import {loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat, /*toggleShops,*//* toggleCategories,*/ /*shopCount, */warningMessage, searchSC} from '../states/searchFunctions.js'
+import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat, /*toggleShops,*//* toggleCategories,*/ /*shopCount, */warningMessage, searchSC} from '../states/searchFunctions.js'
 import { ref, onMounted } from 'vue'
 import { shops, categories, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg} from '../states/shops.js'
 import ViewInformation from '@/components/ViewInformation.vue'
@@ -14,6 +14,9 @@ const visible = ref(false)
 onMounted( () => {
   //fetchShops() // fetch on init
   console.log('onMounted: called');
+  clearShops();
+  clearSearchSC();
+  clearWarning();
 })
 
 const toggleVisibility = (index) => {

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, watch, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName} from '../states/shops.js'
-import {loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
+import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
@@ -10,7 +10,10 @@ const visible = ref([false])
 
 onMounted( () => {
   //fetchShops() // fetch on init
-  console.log('onMounted: called');
+  console.log('onMounted: called')
+  clearShops();
+  clearSearchSC();
+  clearWarning();
 });
 
 const toggleVisibility = (index) => {

@@ -5,11 +5,19 @@ import App from './App.vue'
 import router from './router'
 import { createBootstrap } from 'bootstrap-vue-next'
 
-// Import Bootstrap and BootstrapVue CSS files
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
 
+import VueGoogleMaps from '@fawmi/vue-google-maps';
 const app = createApp(App)
+
+app.use(VueGoogleMaps, {
+  load: {
+    key: 'YOUR_API_KEY',
+  },
+}).mount('#app');
+
+
 
 // Make BootstrapVue available throughout the project
 app.use(createBootstrap({components: true, directives: true}))
