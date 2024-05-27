@@ -1,11 +1,12 @@
 import { ref, onMounted, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProdName} from '../states/shops.js'
-
+import { seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 const warningMessage = ref('')
 const searchSC = ref('')
+const categArray = ref([[]])
 
 async function clearSearchSC(){
     return searchSC.value = ''
@@ -26,6 +27,7 @@ async function loadShops(){
       console.log('shops.value.cat: ' + shops.value[0].category);
   
       shops.value.sort((a, b) => a.name.localeCompare(b.name));
+      seeShops();
       return;
     } catch(error){
         console.log('error: ' + error);
@@ -51,6 +53,10 @@ async function searchShopfromCat(category){
     }
       warningMessage.value = '';
       shops.value.sort((a, b) => a.name.localeCompare(b.name));
+      categArray.value.push(shops.value);
+      console.log('SHOPS: ' + shops.value);
+      console.log('CATEGARRAY: ' + categArray.value[0].name);
+      seeShops();
       return;
   } catch(error){
       console.log('error: ' + error);
@@ -84,6 +90,7 @@ async function searchShopByName(categToSearch){
     return;
   }
   warningMessage.value = ''
+
   if(categToSearch!=undefined){
     searchShopfromCat(categToSearch);
   }
@@ -109,6 +116,7 @@ async function searchShopByName(categToSearch){
           warningMessage.value = '';
    
           shops.value.sort((a, b) => a.name.localeCompare(b.name));
+          seeShops();
           return;
         }catch(error){
                 console.log('error: ' + error);

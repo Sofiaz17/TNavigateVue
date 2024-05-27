@@ -3,6 +3,8 @@ import { ref, onMounted, watch, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName} from '../states/shops.js'
 import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, searchShopByProduct, prodCategory, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
+import GMap from '@/components/GMap.vue'
+import { seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
@@ -15,6 +17,7 @@ onMounted( () => {
   clearShops();
   clearSearchSC();
   clearWarning();
+  clearMarkers();
 });
 
 const toggleVisibility = (index) => {
@@ -55,4 +58,7 @@ const toggleVisibility = (index) => {
      </BListGroupItem>
     </BListGroup>
     
+    <div>
+    <GMap :markers="markers" />
+  </div>
 </template>

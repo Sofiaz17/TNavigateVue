@@ -26,7 +26,20 @@ import { RouterLink, RouterView } from 'vue-router'
   </header>
 
     <RouterView />
-
+<!-- <body> <GMapMap
+      :center="{ lat: 46.067546, lng: 11.121488 }", 
+      :zoom="15" 
+      map-type-id="roadmap" 
+      style="width: 450px; height: 450px"
+      :options="{
+        zoomControl: true,
+        mapTypeControl: true,
+        scaleControl: true,
+        streetViewControl: true,
+        rotateControl: true,
+        fullscreenControl: true
+      }"
+    /></body> -->
   <!-- <main>
     <TheWelcome />
   </main> -->
@@ -114,7 +127,7 @@ nav a:first-of-type {
 
   header .wrapper {
     display: flex;
-    place-items: flex-start;
+    place-items: space-evenly;
     flex-wrap: wrap;
   }
 

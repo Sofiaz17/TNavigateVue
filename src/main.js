@@ -13,9 +13,9 @@ const app = createApp(App)
 
 app.use(VueGoogleMaps, {
   load: {
-    key: 'YOUR_API_KEY',
-  },
-}).mount('#app');
+    key: import.meta.env.VITE_API_KEY
+  }, 
+});
 
 
 
