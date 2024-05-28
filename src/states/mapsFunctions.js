@@ -1,23 +1,42 @@
-import { ref, onMounted, computed } from 'vue'
-import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProdName} from '../states/shops.js'
+import { ref, onMounted, computed, toRaw } from 'vue'
+import { shops,updateCoordinates, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProdName} from '../states/shops.js'
+
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
+
+
 const markers = ref([])
-async function clearMarkers(){
-    markers.value.length = 0;
+ function clearMarkers(){
+    //markers.value.map((marker)=> toRaw(marker).setMap(null));
+    // markers.value.length = 0;
+    console.log('markers before: ' + markers.value);
+    markers.value = [];
+    console.log('markers after: '+ markers.value);
     console.log('markers.value.length: ' + markers.value.length);
     //this.$refs.map.$mapObject.clearMarkers(); //or 
     //this.$refs['map'].$mapObject.clearMarkers();
     return; 
 }
+// async function clearMarkers() {
+//     console.log('clearMarkers');
+//     markers.value.forEach((marker, index) => {
+//       const refMarker = this.$refs[`marker${index}`];
+//       if (refMarker) {
+//         refMarker.setMap(null);
+//         this.$refs[`marker${index}`] = null;
+//       }})}
 
 
 async function seeShops(){
   
     try{
         // await fetchShops();
+        const shopsSelf = [];
         const geocodePromises = shops.value.map((shop) =>{
+            console.log('SHOP.ID: '+ shop.self)
+            shopsSelf.push(shop.self);
+            console.log('shopsIds: ' + shopsSelf);
             return new Promise((resolve,reject) => {
                 geocode(shop.address, resolve, reject);
             });
@@ -35,6 +54,14 @@ async function seeShops(){
             markers.value.push({
                 position: position
             });
+
+            console.log('LNG: '+ result.geometry.location.lng());
+            shopsSelf.forEach((self) =>{
+
+            console.log('ARRAYSELF: '+ self );
+                updateCoordinates([result.geometry.location.lat(), result.geometry.location.lng()], self)}
+            )
+             
            // markers.value[index].position.lng =  result.geometry.location.lng();
             
         })

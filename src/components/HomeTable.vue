@@ -21,8 +21,9 @@ onMounted( () => {
   clearWarning();
   clearMarkers();
   console.log('MARKERS: ' + markers.value.position);
- 
+
 });
+
 
 const toggleVisibility = (index) => {
   visible.value[index] = !visible.value[index]

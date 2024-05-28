@@ -6,7 +6,7 @@ const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 const warningMessage = ref('')
 const searchSC = ref('')
-const categArray = ref([[]])
+const categArray = ref([])
 
 async function clearSearchSC(){
     return searchSC.value = ''
@@ -46,7 +46,14 @@ async function loadCategories(){
  
 async function searchShopfromCat(category){
   try{
-    await fetchShopsCateg(category);
+     await fetchShopsCateg(category);
+    //console.log('function return: ' + response.value);
+    // if(!(await fetchShopsCateg(category))){
+    //   console.log('OPS 404 NOT FOUND');
+    //   warningMessage.value = 'Nessun risultato';
+    //   return;   
+    // } else{
+    warningMessage.value = '';
     console.log('searchShopfromCat: ' + shops);
     if(shops.value.length === 0){
       warningMessage.value = 'Nessun risultato';
@@ -55,9 +62,14 @@ async function searchShopfromCat(category){
       shops.value.sort((a, b) => a.name.localeCompare(b.name));
       categArray.value.push(shops.value);
       console.log('SHOPS: ' + shops.value);
-      console.log('CATEGARRAY: ' + categArray.value[1].name);
+      console.log('CATEGARRAY: ' );
+
+      categArray.value.forEach((element) =>{
+        console.log('Element: ' );
+        element.forEach((shop) => {console.log(shop.name)})});
       seeShops();
       return;
+    //}
   } catch(error){
       console.log('error: ' + error);
     }

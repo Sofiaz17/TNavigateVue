@@ -1,13 +1,13 @@
 <template>
   <GMapMap
-    :ref="Gmap"
+    ref="mapRef"
     :center="center"
     :zoom="zoom"
     map-type-id="roadmap"
     style="width: 450px; height: 450px"
     :options="mapOptions"
   >
-  <GMapMarker
+    <GMapMarker
       v-for="(marker, index) in markers"
       :key="index"
       :ref="`marker${index}`"
@@ -16,26 +16,12 @@
       :draggable="false"
       @click="openInfoWindow(index)"
     />
-    <!-- <GMapInfoWindow
-        v-if="infoWindowIndex === index"
-        :position="marker.position"
-        :content="marker.info"
-        @closeclick="closeInfoWindow"
-      /> -->
   </GMapMap>
 </template>
 
 <script>
-
 export default {
   name: 'GMap',
-  // components: {
-  //   GMapMap: () => import('@fawmi/vue-google-maps/component/Map'),
-  //   GMapAdvancedMarkerElement: () => import('@fawmi/vue-google-maps/components/Marker'),
-  //   GMapInfoWindow: () => import('@fawmi/vue-google-maps/components/InfoWindow')
-  //   // GMapAdvancedMarkerElement,
-  //   // GMapInfoWindow
-  // },
   props: {
     center: {
       type: Object,
@@ -61,109 +47,77 @@ export default {
       default: () => []
     }
   },
-  data(){
-    return{
+  data() {
+    return {
       infoWindowIndex: null
     };
-  },
-  watch: {
-    markers: {
-      handler(newMarkers) {
-        this.updateMapMarkers(newMarkers);
-      },
-      deep: true
-    }
-  },
-  methods: {
-    openInfoWindow(index) {
-      this.infoWindowIndex = null;
-    },
-    updateMapMarkers(newMarkers) {
-      // Clear existing markers on the map
-      if (this.$refs.gmap && this.$refs.gmap.$mapObject) {
-        this.$refs.gmap.$mapObject.clear();
-        // Add new markers to the map
-        newMarkers.forEach(marker => {
-          this.$refs.gmap.$mapObject.addMarker({
-            position: marker.position,
-            clickable: true,
-            draggable: false
-          });
-        });
-      }
-    }
   }
-}
+  // mounted() {
+  //   this.reinitializeMap();
+  // },
+  // watch: {
+  //   markers: {
+  //     handler() {
+  //       this.updateMapMarkers();
+  //     },
+  //     deep: true
+  //   }
+  // },
+  // methods: {
+  //   openInfoWindow(index) {
+  //     this.infoWindowIndex = index;
+  //   },
+  //   updateMapMarkers() {
+  //     console.log('updateMapMarkers');
+  //     if (this.map) {
+  //       // Clear existing markers
+  //       this.clearMarkers();
 
-// //console.log('this.$refs[map].$mapObject: ' + self.$refs.gmap.$mapObject);
-// self.$nextTick(() => {
-//     this.$refs.gmap.$mapCreated.then(() => {
-//       console.log('this.$refs[map].$mapObject: ' + self.$refs.gmap.$mapObject);
-//     })
-// })
+  //       // Add new markers to the map
+  //       this.markers.forEach((marker, index) => {
+  //         const newMarker = new google.maps.Marker({
+  //           position: marker.position,
+  //           map: this.map,
+  //           clickable: true,
+  //           draggable: false
+  //         });
+
+  //         // Store marker reference for future use
+  //         this.$refs[`marker${index}`] = newMarker;
+
+  //         newMarker.addListener('click', () => {
+  //           this.openInfoWindow(index);
+  //         });
+  //       });
+  //     }
+  //   },
+  //   clearMarkers() {
+  //     console.log('clearMarkers');
+  //     this.markers.forEach((marker, index) => {
+  //       const refMarker = this.$refs[`marker${index}`];
+  //       //console.log('refMarker: ' + JSON.stringify(refMarker));
+  //       if (refMarker) {
+  //         refMarker.setMap(null);
+  //         this.$refs[`marker${index}`] = null;
+  //       }
+  //     });
+  //   },
+  //   reinitializeMap() {
+  //     console.log('reinitializeMap');
+  //     this.$refs.mapRef.$mapPromise.then((map) => {
+  //       this.map = map;
+  //       console.log('map initialized: ', map);
+
+  //       // Initialize or update markers
+  //       this.updateMapMarkers();
+  //     }).catch((error) => {
+  //       console.error('Error initializing map:', error);
+  //     });
+  //   }
+  // }
+};
 </script>
 
 <style scoped>
 /* Add any necessary styling here */
 </style>
-
-
-
-
-<!-- 
-<script setup>
-import { defineProps } from 'vue'
-
-const props = defineProps({
-  markers: {
-    type: Object,
-    required: true
-  }
-})
-</script>
-
-<template>
-    <GMapMap>
-    <GMapMarker
-      :key="index"
-      v-for="(m, index) in markers"
-    />
-  </GMapMap>
-   
-
-  <GMapMarker
-        :key="markerDetails.id"
-        :position="markerDetails.position"
-        :clickable="true"
-        :draggable="false"
-        @click="openMarker(markerDetails.id)"
-      >-->
-        <!-- InfoWindow to display the searched location details -->
-          <!-- <GMapInfoWindow
-            v-if="locationDetails.address != ''"
-            :closeclick="true"
-            @closeclick="openMarker(null)"
-            :opened="openedMarkerID === markerDetails.id"
-            :options="{
-              pixelOffset: {
-                width: 10,
-                height: 0
-              },
-              maxWidth: 320,
-              maxHeight: 320
-            }"
-
-          >
-            <div class="location-details">
-                <p> Added Info </p>
-            </div>
-          </GMapInfoWindow>
-      </GMapMarker>   
-  </template>
-  
-
-  
-  <style scoped>
-  /* Add any specific styles for this component */
-  </style>
-   --> 
