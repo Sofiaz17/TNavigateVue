@@ -36,5 +36,14 @@ async function fetchProdName(prodName){
     products.value = await (await fetch(PRODUCT_URL + '?name=' + prodName)).json()
 }
 
+async function updateCoordinates(coordinates, self) {
+    console.log('updating coordinates');
+    let response = await fetch(HOST+self, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify( { coordinates: coordinates } ),
+    })
+};
 
-export { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName}
+
+export { shops, categories, products, updateCoordinates, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName}

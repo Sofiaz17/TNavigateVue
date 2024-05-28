@@ -28,7 +28,7 @@ app.use(router)
 //     console.log("app error: " + err);
 // }
 app.config.errorHandler = (err, instance, info) => {
-console.error('Error: ' + err +', Info: ' + info +', Instance: ' /*+ instance*/);
+console.error('Error: ' + err +', Info: ' + info +', Instance: ' + + (instance?.type?.name || 'Unknown'));
 };
 
 app.mount('#app')
