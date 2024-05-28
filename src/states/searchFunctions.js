@@ -55,7 +55,7 @@ async function searchShopfromCat(category){
       shops.value.sort((a, b) => a.name.localeCompare(b.name));
       categArray.value.push(shops.value);
       console.log('SHOPS: ' + shops.value);
-      console.log('CATEGARRAY: ' + categArray.value[0].name);
+      console.log('CATEGARRAY: ' + categArray.value[1].name);
       seeShops();
       return;
   } catch(error){
