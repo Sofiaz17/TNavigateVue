@@ -7,6 +7,11 @@
     style="width: 450px; height: 450px"
     :options="mapOptions"
   >
+  <button
+        @click='getRoute()'
+      >
+        Route
+      </button>
     <GMapMarker
       v-for="(marker, index) in markers"
       :key="index"
@@ -22,6 +27,11 @@
 <script>
 export default {
   name: 'GMap',
+  mounted() {
+    this.$refs.mapRef.$mapPromise.then((mapObject) => {
+      console.log('map is loaded now', mapObject);
+    });
+  },
   props: {
     center: {
       type: Object,
@@ -51,70 +61,162 @@ export default {
     return {
       infoWindowIndex: null
     };
+  },
+  methods: {
+     
+    
+  },
+  mounted() {
+    this.reinitializeMap();
+  },
+  watch: {
+    markers: {
+      handler() {
+        this.updateMapMarkers();
+      },
+      deep: true
+    }
+  },
+  methods: {
+    getRoute() {
+    // POST request using fetch with error handling
+    const requestOptions = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 
+                 'X-Goog-Api-Key': import.meta.env.VITE_API_KEY,  
+                 'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'},
+      body: JSON.stringify(
+        {
+            "origin":{
+              "location":{
+                "latLng":{
+                  "latitude": 46.067546,
+                  "longitude": 11.121488
+                }
+              }
+            },
+            "destination":{
+              "location":{
+                "latLng":{
+                  "latitude": 46.0663851,
+                  "longitude": 11.1544449
+                }
+              }
+            },
+            "travelMode": "DRIVE",
+            "routingPreference": "TRAFFIC_AWARE",
+            "departureTime": "2024-05-29T18:41:23.045123456Z",
+            "computeAlternativeRoutes": false,
+            // "routeModifiers": {
+            //   "avoidTolls": false,
+            //   "avoidHighways": false,
+            //   "avoidFerries": false
+            // },
+           // "languageCode": "en-US",
+            //"units": "IMPERIAL"
+          })
+    };
+    fetch('https://routes.googleapis.com/directions/v2:computeRoutes', requestOptions)
+      .then(async response => {
+        const data = await response.json();
+  
+        // check for error response
+        if (!response.ok) {
+          // get error message from body or default to response status
+          const error = (data && data.message) || response.status;
+          return Promise.reject(error);
+        }
+
+        if (data.routes && data.routes[0] && data.routes[0].polyline) {
+          this.drawPolyline(data.routes[0].polyline.encodedPolyline);
+        }
+  
+        console.log('RESPONSE: ' + data.value);
+        console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
+      })
+      .catch(error => {
+        console.error('There was an error!', error);
+      });
+  },
+
+  drawPolyline(encodedPolyline) {
+    console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
+      const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
+      if (this.polyline) {
+        this.polyline.setMap(null);
+      }
+      this.polyline = new google.maps.Polyline({
+        path: path,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+      });
+      this.polyline.setMap(this.map);
+    },
+    reinitializeMap() {
+      console.log('reinitializeMap');
+      this.$refs.mapRef.$mapPromise.then((map) => {
+        this.map = map;
+        console.log('map initialized: ', map);
+
+        // Initialize or update markers
+       // this.updateMapMarkers();
+      }).catch((error) => {
+        console.error('Error initializing map:', error);
+      });
+    },
+    openInfoWindow(index) {
+      this.infoWindowIndex = index;
+    },
+    updateMapMarkers() {
+      console.log('updateMapMarkers');
+      if (this.map) {
+        // Clear existing markers
+        this.clearMarkers();
+
+        // Add new markers to the map
+        this.markers.forEach((marker, index) => {
+          const newMarker = new google.maps.Marker({
+            position: marker.position,
+            map: this.map,
+            clickable: true,
+            draggable: false
+          });
+
+          // Store marker reference for future use
+          this.$refs[`marker${index}`] = newMarker;
+
+          newMarker.addListener('click', () => {
+            this.openInfoWindow(index);
+          });
+        });
+      }
+    },
+    clearMarkers() {
+      console.log('clearMarkers');
+      this.markers.forEach((marker, index) => {
+        const refMarker = this.$refs[`marker${index}`];
+        //console.log('refMarker: ' + JSON.stringify(refMarker));
+        if (refMarker) {
+          refMarker.setMap(null);
+          this.$refs[`marker${index}`] = null;
+        }
+      });
+    },
+    reinitializeMap() {
+      console.log('reinitializeMap');
+      this.$refs.mapRef.$mapPromise.then((map) => {
+        this.map = map;
+        console.log('map initialized: ', map);
+
+        //Initialize or update markers
+        this.updateMapMarkers();
+      }).catch((error) => {
+        console.error('Error initializing map:', error);
+      });
+    }
   }
-  // mounted() {
-  //   this.reinitializeMap();
-  // },
-  // watch: {
-  //   markers: {
-  //     handler() {
-  //       this.updateMapMarkers();
-  //     },
-  //     deep: true
-  //   }
-  // },
-  // methods: {
-  //   openInfoWindow(index) {
-  //     this.infoWindowIndex = index;
-  //   },
-  //   updateMapMarkers() {
-  //     console.log('updateMapMarkers');
-  //     if (this.map) {
-  //       // Clear existing markers
-  //       this.clearMarkers();
-
-  //       // Add new markers to the map
-  //       this.markers.forEach((marker, index) => {
-  //         const newMarker = new google.maps.Marker({
-  //           position: marker.position,
-  //           map: this.map,
-  //           clickable: true,
-  //           draggable: false
-  //         });
-
-  //         // Store marker reference for future use
-  //         this.$refs[`marker${index}`] = newMarker;
-
-  //         newMarker.addListener('click', () => {
-  //           this.openInfoWindow(index);
-  //         });
-  //       });
-  //     }
-  //   },
-  //   clearMarkers() {
-  //     console.log('clearMarkers');
-  //     this.markers.forEach((marker, index) => {
-  //       const refMarker = this.$refs[`marker${index}`];
-  //       //console.log('refMarker: ' + JSON.stringify(refMarker));
-  //       if (refMarker) {
-  //         refMarker.setMap(null);
-  //         this.$refs[`marker${index}`] = null;
-  //       }
-  //     });
-  //   },
-  //   reinitializeMap() {
-  //     console.log('reinitializeMap');
-  //     this.$refs.mapRef.$mapPromise.then((map) => {
-  //       this.map = map;
-  //       console.log('map initialized: ', map);
-
-  //       // Initialize or update markers
-  //       this.updateMapMarkers();
-  //     }).catch((error) => {
-  //       console.error('Error initializing map:', error);
-  //     });
-  //   }
-  // }
 };
 </script>
 

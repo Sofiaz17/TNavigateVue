@@ -88,46 +88,65 @@ function geocode(request, resolve, reject) {
         }
     });
 }
-// function seeShops() {
-//     console.log('seeShops called');
-   
-//     fetch('../api/v1/shops')
-//         .then((resp) => resp.json()) // Transform the data into json
-//         .then(function(data) { 
-//             // Create an array to store promises
-//             const geocodePromises = [];
-//             // Iterate over each shop data and create a promise for geocoding
-//             data.forEach(function(shop) {
-//                 // Create a promise for each geocoding request
-//                 const promise = new Promise((resolve, reject) => {
-//                     geocode(shop.address, resolve, reject);
-//                 });
-//                 // Push the promise to the array
-//                 geocodePromises.push(promise);
-//             });
-//             // Wait for all geocoding promises to resolve
-//             return Promise.all(geocodePromises);
-//         })
-//         .then(function(results) {
-//             console.log('Results:', results);
-          
-//             results.forEach(function (result){
-//                 console.log('Geocoding completed:', result.address_components);
-//                 console.log('Geocoding completed:', result.geometry.location.lat(), ' ', result.geometry.location.lng());
-             
 
-//                 new google.maps.Marker({
-//                     position: {lat: result.geometry.location.lat(), lng: result.geometry.location.lng()},
-//                     map,
-//                     title: "Hello World!",
-//                   })}
-//             )
-//             // This code will execute after all geocoding requests are complete
-//              })
-//             // Do something with the geocoding results
-//         .catch(function(error) {
-//             console.error(error);
-//         });
-// }
 
-export {seeShops, markers, clearMarkers}
+ 
+// function getRoute() {
+//     // POST request using fetch with error handling
+//     const requestOptions = {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json', 
+//                  'X-Goog-Api-Key': import.meta.env.VITE_API_KEY,  
+//                  'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'},
+//       body: JSON.stringify(
+//         {
+//             "origin":{
+//               "location":{
+//                 "latLng":{
+//                   "latitude": 46.067546,
+//                   "longitude": 11.121488
+//                 }
+//               }
+//             },
+//             "destination":{
+//               "location":{
+//                 "latLng":{
+//                   "latitude": 46.0663851,
+//                   "longitude": 11.1544449
+//                 }
+//               }
+//             },
+//             "travelMode": "DRIVE",
+//             "routingPreference": "TRAFFIC_AWARE",
+//             //"departureTime": "2023-10-15T15:01:23.045123456Z",
+//             "computeAlternativeRoutes": false,
+//             // "routeModifiers": {
+//             //   "avoidTolls": false,
+//             //   "avoidHighways": false,
+//             //   "avoidFerries": false
+//             // },
+//            // "languageCode": "en-US",
+//             //"units": "IMPERIAL"
+//           })
+//     };
+//     fetch('https://routes.googleapis.com/directions/v2:computeRoutes', requestOptions)
+//       .then(async response => {
+//         const data = await response.json();
+  
+//         // check for error response
+//         if (!response.ok) {
+//           // get error message from body or default to response status
+//           const error = (data && data.message) || response.status;
+//           return Promise.reject(error);
+//         }
+  
+//         console.log('RESPONSE: ' + data.value);
+//         console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
+//       })
+//       .catch(error => {
+//         console.error('There was an error!', error);
+//       });
+//   }
+
+
+export {seeShops, markers, clearMarkers, /*getRoute*/}

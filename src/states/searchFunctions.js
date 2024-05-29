@@ -46,7 +46,20 @@ async function loadCategories(){
  
 async function searchShopfromCat(category){
   try{
-     await fetchShopsCateg(category);
+    await fetchShopsCateg(category);
+    //   .then(async response => {
+    //     const data = await response.json();
+    //     console.log('RESPONSE: ' + response);
+
+    //     // check for error response
+    //     if (!response.ok) {
+    //       console.log('OPS 404 NOT FOUND');
+    //       warningMessage.value = 'Nessun risultato'; 
+    //       // get error message from body or default to response status
+    //       const error = (data && data.message) || response.status;
+    //       return Promise.reject(error);
+    //     }
+    // })
     //console.log('function return: ' + response.value);
     // if(!(await fetchShopsCateg(category))){
     //   console.log('OPS 404 NOT FOUND');

@@ -14,7 +14,8 @@ const app = createApp(App)
 
 app.use(VueGoogleMaps, {
   load: {
-    key: import.meta.env.VITE_API_KEY
+    key: import.meta.env.VITE_API_KEY,
+    libraries: 'geometry'
   }, 
 });
 

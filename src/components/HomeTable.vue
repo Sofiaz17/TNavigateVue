@@ -2,7 +2,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName} from '../states/shops.js'
 import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
-import { seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
+import { /*getRoute,*/ seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
 
@@ -26,8 +26,9 @@ onMounted( () => {
 
 
 const toggleVisibility = (index) => {
+  getRoute();
   visible.value[index] = !visible.value[index]
-  console.log('this.$refs:' + this.$refs['Gmap']);
+  //console.log('this.$refs:' + this.$refs['Gmap']);
   //console.log('MARKERS: ' + markers.value);
 }
 
