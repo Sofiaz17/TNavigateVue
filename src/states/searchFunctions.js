@@ -2,6 +2,7 @@ import { ref, onMounted, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProdName} from '../states/shops.js'
 import { seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
 
+
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 const warningMessage = ref('')
@@ -47,27 +48,8 @@ async function loadCategories(){
 async function searchShopfromCat(category){
   try{
     await fetchShopsCateg(category);
-    //   .then(async response => {
-    //     const data = await response.json();
-    //     console.log('RESPONSE: ' + response);
-
-    //     // check for error response
-    //     if (!response.ok) {
-    //       console.log('OPS 404 NOT FOUND');
-    //       warningMessage.value = 'Nessun risultato'; 
-    //       // get error message from body or default to response status
-    //       const error = (data && data.message) || response.status;
-    //       return Promise.reject(error);
-    //     }
-    // })
-    //console.log('function return: ' + response.value);
-    // if(!(await fetchShopsCateg(category))){
-    //   console.log('OPS 404 NOT FOUND');
-    //   warningMessage.value = 'Nessun risultato';
-    //   return;   
-    // } else{
     warningMessage.value = '';
-    console.log('searchShopfromCat: ' + shops);
+    console.log('searchShopfromCat: ' + shops.value);
     if(shops.value.length === 0){
       warningMessage.value = 'Nessun risultato';
     }
@@ -82,7 +64,7 @@ async function searchShopfromCat(category){
         element.forEach((shop) => {console.log(shop.name)})});
       seeShops();
       return;
-    //}
+    
   } catch(error){
       console.log('error: ' + error);
     }

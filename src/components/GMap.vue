@@ -62,10 +62,6 @@ export default {
       infoWindowIndex: null
     };
   },
-  methods: {
-     
-    
-  },
   mounted() {
     this.reinitializeMap();
   },

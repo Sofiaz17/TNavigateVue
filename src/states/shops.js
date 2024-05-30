@@ -1,4 +1,5 @@
-import { reactive } from 'vue'
+import { reactive, warn } from 'vue'
+import { warningMessage } from './searchFunctions'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 const API_URL = HOST+`/api/v1`
@@ -12,12 +13,24 @@ const products = reactive([])
 
 console.log('HOST_URL: ' + HOST);
 
-async function fetchShops() {
+async function fetchShops() { 
     shops.value = await (await fetch(SHOPS_URL)).json()
 }
 
 async function fetchShopsName(name){
+    // let response = await fetch(SHOPS_URL + '?name=' + name);
+    // if(!response.ok){
+    //     console.error('Error: ', response.statusText);
+    //     throw new Error('fetch was not ok');
+    // }
+    // shops.value = await response.json();
+    // console.log('AAAAAAAAARESPONSE: ' + shops.value);
+    // return data;
     shops.value = await (await fetch(SHOPS_URL + '?name=' + name)).json()
+    // return shops.value;
+    // //shops.value = await (await fetch(SHOPS_URL)).json()
+    // shops.value = await response.json();
+    // return response.status;
 }
 
 async function fetchCategories(){
@@ -25,7 +38,21 @@ async function fetchCategories(){
 }
 
 async function fetchShopsCateg(category){
-    shops.value = await (await fetch(SHOPS_URL + '?category=' + category)).json()
+   // shops.value = await (await fetch(SHOPS_URL + '?category=' + category)).json()
+    let response = await fetch(SHOPS_URL + '?category=' + category);
+    if(!response.ok){
+        console.error('Error: ', response.statusText);
+        warningMessage.value = 'Nessun negozio in questa categoria';
+        throw new Error('fetch was not ok');
+    }
+    warningMessage.value = '';
+    shops.value = await response.json();
+    console.log('RESPONSE: ' + shops.value);
+    //shops.value = await (await fetch(SHOPS_URL + '?name=' + name)).json()
+    // return shops.value;
+    // //shops.value = await (await fetch(SHOPS_URL)).json()
+    // shops.value = await response.json();
+    // return response.status;
 }
 
 async function fetchProd(){
