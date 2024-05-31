@@ -7,6 +7,8 @@ const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 
 const markers = ref([])
+const myMarker = ref([])
+
  function clearMarkers(){
     //markers.value.map((marker)=> toRaw(marker).setMap(null));
     // markers.value.length = 0;
@@ -149,4 +151,4 @@ function geocode(request, resolve, reject) {
 //   }
 
 
-export {seeShops, markers, clearMarkers, /*getRoute*/}
+export {seeShops, markers, myMarker, clearMarkers, /*getRoute*/}

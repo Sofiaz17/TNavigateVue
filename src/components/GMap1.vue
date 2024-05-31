@@ -28,7 +28,7 @@
         @closeclick="closeInfoWindow"
       /> -->
   <!-- </GMapMap> -->
-</template>
+<!-- </template> -->
 
 <script>
 

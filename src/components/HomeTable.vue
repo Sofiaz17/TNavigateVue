@@ -7,11 +7,13 @@ import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
 
 
+
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 
 const visible = ref([false])
 //const markers = ref([]);
+
 
 onMounted( () => {
   //fetchShops() // fetch on init
@@ -20,16 +22,19 @@ onMounted( () => {
   clearSearchSC();
   clearWarning();
   clearMarkers();
+  //reinitializeMap();
   console.log('MARKERS: ' + markers.value.position);
+
 
 });
 
 
 const toggleVisibility = (index) => {
-  getRoute();
+  //getRoute();
   visible.value[index] = !visible.value[index]
   //console.log('this.$refs:' + this.$refs['Gmap']);
   //console.log('MARKERS: ' + markers.value);
+  geolocate();
 }
 
 </script>
@@ -67,7 +72,8 @@ const toggleVisibility = (index) => {
     </BListGroup>
 
   <div>
-    <GMap :markers="markers" />
+    <GMap  />
+  
   </div>
 
  <!-- Marker to display the searched location -->
