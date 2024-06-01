@@ -52,6 +52,7 @@ async function searchShopfromCat(category){
     console.log('searchShopfromCat: ' + shops.value);
     if(shops.value.length === 0){
       warningMessage.value = 'Nessun risultato';
+      
     }
       warningMessage.value = '';
       shops.value.sort((a, b) => a.name.localeCompare(b.name));

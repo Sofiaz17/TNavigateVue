@@ -1,5 +1,6 @@
 import { reactive, warn } from 'vue'
 import { warningMessage } from './searchFunctions'
+import { seeShops } from './mapsFunctions'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 const API_URL = HOST+`/api/v1`
@@ -43,6 +44,11 @@ async function fetchShopsCateg(category){
     if(!response.ok){
         console.error('Error: ', response.statusText);
         warningMessage.value = 'Nessun negozio in questa categoria';
+        while(shops.value.length > 0){
+            //console.log('POPPING: '  + 'length: ' + markers.value.length + ': '+markers.value);
+            shops.value.pop();
+        }
+        seeShops();
         throw new Error('fetch was not ok');
     }
     warningMessage.value = '';
