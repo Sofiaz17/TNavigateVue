@@ -1,6 +1,6 @@
 import { ref, onMounted, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProdName} from '../states/shops.js'
-import { seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
+import { seeShops, markers/*, clearMarkers*/ } from '@/states/mapsFunctions.js'
 
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`

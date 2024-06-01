@@ -4,7 +4,7 @@ import { shops, categories, products, fetchShops, fetchShopsName, fetchCategorie
 import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, searchShopByProduct, prodCategory, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
-import { seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
+import { seeShops, markers/*, clearMarkers */} from '@/states/mapsFunctions.js'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
@@ -17,7 +17,7 @@ onMounted( () => {
   clearShops();
   clearSearchSC();
   clearWarning();
-  clearMarkers();
+ // clearMarkers();
 });
 
 const toggleVisibility = (index) => {

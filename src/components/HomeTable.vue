@@ -2,26 +2,28 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName} from '../states/shops.js'
 import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
-import { /*getRoute,*/ seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
+import { /*getRoute,*/ seeShops, markers/*, clearMarkers */} from '@/states/mapsFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
 
-
+const mapRef = ref(null);
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
-
+//export
 const visible = ref([false])
 //const markers = ref([]);
 
 
 onMounted( () => {
   //fetchShops() // fetch on init
-  console.log('onMounted: called');
+  console.log('onMounted: called' );
+  markers.value.forEach((marker)=>console.log('MARKERS: '+marker.position));
   clearShops();
   clearSearchSC();
   clearWarning();
-  clearMarkers();
+  
+ // clearMarkers();
   //reinitializeMap();
   console.log('MARKERS: ' + markers.value.position);
 
@@ -34,7 +36,7 @@ const toggleVisibility = (index) => {
   visible.value[index] = !visible.value[index]
   //console.log('this.$refs:' + this.$refs['Gmap']);
   //console.log('MARKERS: ' + markers.value);
-  geolocate();
+ // mapRef.value.geolocate();
 }
 
 </script>

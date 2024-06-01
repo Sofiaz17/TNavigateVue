@@ -9,17 +9,17 @@ const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 const markers = ref([])
 const myMarker = ref([])
 
- function clearMarkers(){
-    //markers.value.map((marker)=> toRaw(marker).setMap(null));
-    // markers.value.length = 0;
-    console.log('markers before: ' + markers.value);
-    markers.value = [];
-    console.log('markers after: '+ markers.value);
-    console.log('markers.value.length: ' + markers.value.length);
-    //this.$refs.map.$mapObject.clearMarkers(); //or 
-    //this.$refs['map'].$mapObject.clearMarkers();
-    return; 
-}
+//  function clearMarkers(){
+//     //markers.value.map((marker)=> toRaw(marker).setMap(null));
+//     // markers.value.length = 0;
+//     console.log('markers before: ' + markers.value);
+//     markers.value = [];
+//     console.log('markers after: '+ markers.value);
+//     console.log('markers.value.length: ' + markers.value.length);
+//     //this.$refs.map.$mapObject.clearMarkers(); //or 
+//     //this.$refs['map'].$mapObject.clearMarkers();
+//     return; 
+// }
 // async function clearMarkers() {
 //     console.log('clearMarkers');
 //     markers.value.forEach((marker, index) => {
@@ -33,6 +33,11 @@ const myMarker = ref([])
 async function seeShops(){
   
     try{
+        while(markers.value.length > 0){
+            //console.log('POPPING: '  + 'length: ' + markers.value.length + ': '+markers.value);
+            markers.value.pop();
+        }
+        
         // await fetchShops();
         const shopsSelf = [];
         const geocodePromises = shops.value.map((shop) =>{
@@ -53,11 +58,12 @@ async function seeShops(){
              lat: result.geometry.location.lat(),
              lng: result.geometry.location.lng()
             };
+            
             markers.value.push({
                 position: position
             });
 
-            console.log('LNG: '+ result.geometry.location.lng());
+            markers.value.forEach((marker)=>console.log('MARKER: '+marker.position));
             shopsSelf.forEach((self) =>{
 
             console.log('ARRAYSELF: '+ self );
@@ -151,4 +157,4 @@ function geocode(request, resolve, reject) {
 //   }
 
 
-export {seeShops, markers, myMarker, clearMarkers, /*getRoute*/}
+export {seeShops, markers, myMarker,/* clearMarkers,*/ /*getRoute*/}

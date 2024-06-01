@@ -1,8 +1,13 @@
 <script setup>
-  import { defineProps } from 'vue'
-  import { ref, onMounted, watch, computed } from 'vue'
+  import { defineProps, onUpdated } from 'vue'
+  import { ref, defineExpose, onMounted, watch, computed, onBeforeUnmount } from 'vue'
   import { markers, myMarker } from '@/states/mapsFunctions'
   import myPin from '@/components/icons/myPin.png'
+
+  watch(markers, (oldMarkers, newMarkers) =>{
+    console.log('WATCHING...');
+    clearMarkers();
+  } )
 
 
   const props = defineProps({
@@ -33,6 +38,8 @@
 
   const center = ref(props.mycenter);
   const mapRef = ref(null);
+  let polyline = null;
+  //const map = ref(null);
     // onMounted() {
     //   this.$refs.mapRef.$mapPromise.then((mapObject) => {
     //     console.log('map is loaded now', mapObject);
@@ -40,18 +47,64 @@
     //   this.geolocate();
     // };
     onMounted( () =>{
+      reinitializeMap();
+     
         console.log('gmap onmounted');
+       
       mapRef.value.$mapPromise.then((mapObject) => {
         console.log('map is loaded now', mapObject);
+        console.log('marker.setMap:' + mapObject.markers);
+        
       });
+      clearMarkers();
+   
       //initMap();
       //geolocate();
       //this.geolocate();
     });
-  
 
+  function clearMarkers(){
+    // for (let i = 0; i < markers.value.length; i++) {
+    //   markers.value[i].setMap(null);
+    // }
+    if(markers.value.length!=0){
+    markers.value = [];
+    console.log('markers before: ' + markers.value);
+    //markers.value.forEach((marker)=> marker.setMap(null))
+    //this.markers.map((marker) => toRaw(marker).setMap(null))
+    markers.value.length = 0;
+    console.log('markers after: '+ markers.value);
+    console.log('markers.value.length: ' + markers.value.length);
+    //this.$refs.map.$mapObject.clearMarkers(); //or 
+    //this.$refs['map'].$mapObject.clearMarkers();
+    return; 
+    }
+}
+
+async function geolocate() {
+  
+  navigator.geolocation.getCurrentPosition(position => {
+    console.log('in geolocate');
+    console.log('position.coords.latitude: ' +position.coords.latitude);
+    console.log('position.coords.longitude: ' +position.coords.longitude);
+  mapRef.value.$mapPromise.then((mapObject) => {
+      //console.log('center.value: ' + center.value.lat);
+    center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
+  });
+  //addMarker(center.value)
+
+  myMarker.value.push(center.value);
+   // center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
+  reinitializeMap();
+    //this.center.setMap(this.center);
+    // this.center.lat = position.coords.latitude;
+    // this.center.lng = position.coords.longitude 
+  });
+
+}
 function reinitializeMap() {
           console.log('reinitializeMap');
+          clearMarkers();
       mapRef.value.$mapPromise.then((map) => {
         mapRef.value.map = map;
         map.setCenter(center.value);
@@ -61,6 +114,7 @@ function reinitializeMap() {
         markers.value.push({
           //position: center.value
         });
+     // markers.value.forEach((marker)=>addMarker(marker.position))
 
         myMarker.value.push({
           //position: center.value
@@ -72,6 +126,17 @@ function reinitializeMap() {
         });
       }
     
+//const myMap = mapRef.value.map;
+  
+// function addMarker(currentPosition){
+//   markers.value.push(
+//   new google.maps.Marker({
+//     position: currentPosition,
+//     myMap,
+//     title: "Hello World!",
+//   }))
+
+// }
 
     function getRoute() {
       // POST request using fetch with error handling
@@ -100,7 +165,7 @@ function reinitializeMap() {
               },
               "travelMode": "DRIVE",
               "routingPreference": "TRAFFIC_AWARE",
-              "departureTime": "2024-05-29T18:41:23.045123456Z",
+              "departureTime":  new Date().toISOString(),
               "computeAlternativeRoutes": false,
               // "routeModifiers": {
               //   "avoidTolls": false,
@@ -123,7 +188,8 @@ function reinitializeMap() {
           }
   
           if (data.routes && data.routes[0] && data.routes[0].polyline) {
-            this.drawPolyline(data.routes[0].polyline.encodedPolyline);
+            //this.drawPolyline(data.routes[0].polyline.encodedPolyline);
+             drawPolyline(data.routes[0].polyline.encodedPolyline);
           }
     
           console.log('RESPONSE: ' + data.value);
@@ -134,23 +200,24 @@ function reinitializeMap() {
         });
     }
 
-    async function geolocate() {
-      navigator.geolocation.getCurrentPosition(position => {
-        console.log('in geolocate');
-        console.log('position.coords.latitude: ' +position.coords.latitude);
-        console.log('position.coords.longitude: ' +position.coords.longitude);
-      mapRef.value.$mapPromise.then((mapObject) => {
-          //console.log('center.value: ' + center.value.lat);
-        center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
-      });
-      myMarker.value.push(center.value);
-       // center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
-      reinitializeMap();
-        //this.center.setMap(this.center);
-        // this.center.lat = position.coords.latitude;
-        // this.center.lng = position.coords.longitude 
-      });
-    }
+
+      
+const drawPolyline = (encodedPolyline) => {
+  console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
+  const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
+  if (polyline) {
+    mapRef.value.polyline.setMap(null);
+  }
+  polyline = new google.maps.Polyline({
+    path: path,
+    geodesic: true,
+    strokeColor: '#FF0000',
+    strokeOpacity: 1.0,
+    strokeWeight: 2
+  });
+  polyline.setMap(mapRef.value);
+};
+
     // data() {
     //   return {
     //     infoWindowIndex: null
@@ -321,7 +388,14 @@ function reinitializeMap() {
 //     // }
 //   }
 //   }
+//const geol = {geolocate}
+//defineExpose({geolocate})
 //export {geolocate}
+
+onBeforeUnmount(() => {
+  console.log('onBeforeUnmount');
+  clearMarkers();
+ });
   </script>
 
 <template>
@@ -347,17 +421,17 @@ function reinitializeMap() {
       @click="openInfoWindow(index)"
     />
     <GMapMarker
-      v-for="(marker, myIndex) in myMarker"
+      v-for="(myMarker, myIndex) in myMarker"
       :key="myIndex"
-      :ref="`marker${myIndex}`"
-      :position="marker.position"
+      :ref="`myMarker${myIndex}`"
+      :position="myMarker.position"
       :clickable="true"
       :draggable="false"
       :icon= "{
         url: myPin,
         scaledSize: { width: 40, height: 40 } // Adjust width and height as needed
       }"
-      @click="openInfoWindow(index)"
+      @click="openInfoWindow(myIndex)"
     />
   </GMapMap>
 </div>

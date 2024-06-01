@@ -4,7 +4,7 @@ import { ref, onMounted } from 'vue'
 import { shops, categories, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg} from '../states/shops.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
-import { seeShops, markers, clearMarkers } from '@/states/mapsFunctions.js'
+import { seeShops, markers/*, clearMarkers */} from '@/states/mapsFunctions.js'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
@@ -19,7 +19,7 @@ onMounted( () => {
   clearShops();
   clearSearchSC();
   clearWarning();
-  clearMarkers();  //not working
+ // clearMarkers();  //not working
 })
 
 const toggleVisibility = (index) => {

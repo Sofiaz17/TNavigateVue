@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@fawmi/vue-google-maps": "^0.9.79",
+    "@googlemaps/js-api-loader": "^1.16.6",
     "bootstrap": "^5.3.3",
     "bootstrap-vue": "^2.23.1",
     "bootstrap-vue-next": "^0.18.1",
     "dotenv": "^16.4.5",
+    "google-maps-api-loader": "^1.1.1",
     "vue": "^3.4.21",
     "vue-router": "^4.3.2"
   },
