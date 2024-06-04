@@ -1,7 +1,7 @@
 <script setup>
   import { defineProps, onUpdated } from 'vue'
   import { ref, defineExpose, onMounted, watch, computed, onBeforeUnmount } from 'vue'
-  import { markers, myMarker } from '@/states/mapsFunctions'
+  import { markers, myMarker, endingPoint, geocode } from '@/states/mapsFunctions'
   import myPin from '@/components/icons/myPin.png'
 
   watch(markers, (oldMarkers, newMarkers) =>{
@@ -17,7 +17,7 @@
       },
       zoom: {
         type: Number,
-        default: 15
+        default: 13
       },
       mapOptions: {
         type: Object,
@@ -81,27 +81,69 @@
     }
 }
 
-async function geolocate() {
-  
-  navigator.geolocation.getCurrentPosition(position => {
-    console.log('in geolocate');
-    console.log('position.coords.latitude: ' +position.coords.latitude);
-    console.log('position.coords.longitude: ' +position.coords.longitude);
-  mapRef.value.$mapPromise.then((mapObject) => {
-      //console.log('center.value: ' + center.value.lat);
-    center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
-  });
-  //addMarker(center.value)
-
-  myMarker.value.push(center.value);
-   // center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
-  reinitializeMap();
-    //this.center.setMap(this.center);
-    // this.center.lat = position.coords.latitude;
-    // this.center.lng = position.coords.longitude 
-  });
-
+async function getDestinationCoordinates() {
+  try {
+    console.log('GETCOORD: ' + endingPoint.value);
+    let result = await new Promise((resolve, reject) => {
+      geocode(endingPoint.value, resolve, reject);
+    });
+    console.log('RESULT: '+ result);
+    return result;
+  } catch (error) {
+    console.log('error: ' + error);
+  }
 }
+
+
+
+async function geolocate() {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        console.log('in geolocate');
+        console.log('position.coords.latitude: ' + position.coords.latitude);
+        console.log('position.coords.longitude: ' + position.coords.longitude);
+
+        center.value = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        console.log(
+          'GEOLOCATE new center: ' + center.value.lat + ' ,' + center.value.lng
+        );
+
+        myMarker.value.push({ position: center.value });
+        resolve();
+      },
+      (error) => {
+        console.error('Error getting geolocation:', error);
+        reject(error);
+      }
+    );
+  });
+}
+
+
+// async function geolocate() {
+  
+//   navigator.geolocation.getCurrentPosition(position => {
+//     console.log('in geolocate');
+//     console.log('position.coords.latitude: ' +position.coords.latitude);
+//     console.log('position.coords.longitude: ' +position.coords.longitude);
+
+//     center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
+//     console.log('GEOLOCATE new center: '+ center.value.lat +' ,' + center.value.lng);
+
+
+//   myMarker.value.push({position: center.value});
+//    // center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
+//   //reinitializeMap();
+//     //this.center.setMap(this.center);
+//     // this.center.lat = position.coords.latitude;
+//     // this.center.lng = position.coords.longitude 
+//   });
+
+// }
 function reinitializeMap() {
           console.log('reinitializeMap');
           clearMarkers();
@@ -109,16 +151,16 @@ function reinitializeMap() {
         mapRef.value.map = map;
         map.setCenter(center.value);
           //this.map = map;
-          console.log('map initialized: ', map);
+          //console.log('map initialized: ', map);
 
-        markers.value.push({
-          //position: center.value
-        });
-     // markers.value.forEach((marker)=>addMarker(marker.position))
+    //     markers.value.push({
+    //       //position: center.value
+    //     });
+    //  // markers.value.forEach((marker)=>addMarker(marker.position))
 
-        myMarker.value.push({
-          //position: center.value
-        })
+    //     myMarker.value.push({
+    //       //position: center.value
+    //     })
         // Initialize or update markers
         // this.updateMapMarkers();
       }).catch((error) => {
@@ -138,85 +180,165 @@ function reinitializeMap() {
 
 // }
 
-    function getRoute() {
-      // POST request using fetch with error handling
-      const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 
-                   'X-Goog-Api-Key': import.meta.env.VITE_API_KEY,  
-                   'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'},
-        body: JSON.stringify(
-          {
-              "origin":{
-                "location":{
-                  "latLng":{
-                    "latitude": 46.067546,
-                    "longitude": 11.121488
-                  }
-                }
-              },
-              "destination":{
-                "location":{
-                  "latLng":{
-                    "latitude": 46.0663851,
-                    "longitude": 11.1544449
-                  }
-                }
-              },
-              "travelMode": "DRIVE",
-              "routingPreference": "TRAFFIC_AWARE",
-              "departureTime":  new Date().toISOString(),
-              "computeAlternativeRoutes": false,
-              // "routeModifiers": {
-              //   "avoidTolls": false,
-              //   "avoidHighways": false,
-              //   "avoidFerries": false
-              // },
-             // "languageCode": "en-US",
-              //"units": "IMPERIAL"
-            })
-      };
-      fetch('https://routes.googleapis.com/directions/v2:computeRoutes', requestOptions)
-        .then(async response => {
-          const data = await response.json();
+  //  async function getRoute() {
+
+  //     await geolocate();
+  //     console.log('GET ROUTE: start' + center.value.lat + ' ,' + center.value.lng )
+  //     // POST request using fetch with error handling
+  //     const requestOptions = {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json', 
+  //                  'X-Goog-Api-Key': import.meta.env.VITE_API_KEY,  
+  //                  'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'},
+  //       body: JSON.stringify(
+  //         {
+  //             "origin":{
+  //               "location":{
+  //                 "latLng":{
+  //                   "latitude": center.value.lat,
+  //                   "longitude": center.value.lng
+  //                 }
+  //               }
+  //             },
+  //             "destination":{
+  //               "location":{
+  //                 "latLng":{
+  //                   "latitude": 46.0663851,
+  //                   "longitude": 11.1544449 //coop povo
+  //                 }
+  //               }
+  //             },
+  //             "travelMode": "DRIVE",
+  //             "routingPreference": "TRAFFIC_AWARE",
+  //             "departureTime":  new Date().toISOString(),
+  //             "computeAlternativeRoutes": false,
+  //             // "routeModifiers": {
+  //             //   "avoidTolls": false,
+  //             //   "avoidHighways": false,
+  //             //   "avoidFerries": false
+  //             // },
+  //            // "languageCode": "en-US",
+  //             //"units": "IMPERIAL"
+  //           })
+  //     };
+  //     fetch('https://routes.googleapis.com/directions/v2:computeRoutes', requestOptions)
+  //       .then(async response => {
+  //         const data = await response.json();
     
-          // check for error response
-          if (!response.ok) {
-            // get error message from body or default to response status
-            const error = (data && data.message) || response.status;
-            return Promise.reject(error);
-          }
+  //         // check for error response
+  //         if (!response.ok) {
+  //           // get error message from body or default to response status
+  //           const error = (data && data.message) || response.status;
+  //           return Promise.reject(error);
+  //         }
   
-          if (data.routes && data.routes[0] && data.routes[0].polyline) {
-            //this.drawPolyline(data.routes[0].polyline.encodedPolyline);
-             drawPolyline(data.routes[0].polyline.encodedPolyline);
-          }
+  //         if (data.routes && data.routes[0] && data.routes[0].polyline) {
+  //           //this.drawPolyline(data.routes[0].polyline.encodedPolyline);
+  //            drawPolyline(data.routes[0].polyline.encodedPolyline);
+  //         }
     
-          console.log('RESPONSE: ' + data.value);
-          console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
-        })
-        .catch(error => {
-          console.error('There was an error!', error);
-        });
+  //         console.log('RESPONSE: ' + data.value);
+  //         console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
+  //       })
+  //       .catch(error => {
+  //         console.error('There was an error!', error);
+  //       });
+  //   }
+
+    function drawPolyline(encodedPolyline) {
+    //console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
+      const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
+      if (polyline) {
+        polyline.setMap(null);
+      }
+      polyline = new google.maps.Polyline({
+        path: path,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+      });
+      polyline.setMap(mapRef.value.map);
     }
 
+  async function getRoute() {
+  try {
+    await geolocate();
+    console.log(
+      'GET ROUTE: start' + center.value.lat + ' ,' + center.value.lng
+    );
+    // POST request using fetch with error handling
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': import.meta.env.VITE_API_KEY,
+        'X-Goog-FieldMask':
+          'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline',
+      },
+      body: JSON.stringify({
+        origin: {
+          location: {
+            latLng: {
+              latitude: center.value.lat,
+              longitude: center.value.lng,
+            },
+          },
+        },
+        destination: {
+          location: {
+            latLng: {
+              latitude: endingPoint.value.split(' / ')[2].split(',')[0],
+              longitude:  endingPoint.value.split(' / ')[2].split(',')[1]
+            },
+          },
+        },
+        travelMode: 'DRIVE',
+        routingPreference: 'TRAFFIC_AWARE',
+        departureTime: new Date().toISOString(),
+        computeAlternativeRoutes: false,
+      }),
+    };
+    const response = await fetch(
+      'https://routes.googleapis.com/directions/v2:computeRoutes',
+      requestOptions
+    );
+    const data = await response.json();
+
+    // check for error response
+    if (!response.ok) {
+      // get error message from body or default to response status
+      const error = (data && data.message) || response.status;
+      return Promise.reject(error);
+    }
+
+    if (data.routes && data.routes[0] && data.routes[0].polyline) {
+      drawPolyline(data.routes[0].polyline.encodedPolyline);
+    }
+
+    console.log('RESPONSE: ' + data.value);
+    console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('There was an error!', error);
+  }
+}
 
       
-const drawPolyline = (encodedPolyline) => {
-  console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
-  const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
-  if (polyline) {
-    mapRef.value.polyline.setMap(null);
-  }
-  polyline = new google.maps.Polyline({
-    path: path,
-    geodesic: true,
-    strokeColor: '#FF0000',
-    strokeOpacity: 1.0,
-    strokeWeight: 2
-  });
-  polyline.setMap(mapRef.value);
-};
+// const drawPolyline = (encodedPolyline) => {
+//   console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
+//   const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
+//   // if (polyline) {
+//   //   mapRef.value.polyline.setMap(null);
+//   // }
+//   polyline = new google.maps.Polyline({
+//     path: path,
+//     geodesic: true,
+//     strokeColor: '#FF0000',
+//     strokeOpacity: 1.0,
+//     strokeWeight: 2
+//   });
+//   polyline.setMap(mapRef.value);
+// };
 
     // data() {
     //   return {
@@ -400,6 +522,17 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
+    <form @submit.prevent="getRoute">
+      <div>
+        <label for="start-point">Partenza: <i>la tua posizione</i></label>
+      </div>
+      <div>
+        <label for="end-point">Destinazione: <em> {{ endingPoint }} </em></label>
+        <!-- <input id="end-point" v-model="endPoint" type="text" required /> -->
+      </div>
+      <!-- <button @click='getRoute()'> Calcola percorso </button> -->
+      <button type="submit">Calcola percorso</button>
+    </form>
   <GMapMap
     ref="mapRef"
     :center="mycenter"
@@ -408,22 +541,14 @@ onBeforeUnmount(() => {
     style="width: 450px; height: 450px"
     :options="mapOptions"
   >
-  <button @click='getRoute()'> Route </button>
+ 
   <button @click='geolocate()'> Geolocate </button>
   <button @click='reinitializeMap()'> InitMap </button>
-    <GMapMarker
-      v-for="(marker, index) in markers"
+
+  <GMapMarker
+      v-for="(myMarker, index) in myMarker"
       :key="index"
-      :ref="`marker${index}`"
-      :position="marker.position"
-      :clickable="true"
-      :draggable="false"
-      @click="openInfoWindow(index)"
-    />
-    <GMapMarker
-      v-for="(myMarker, myIndex) in myMarker"
-      :key="myIndex"
-      :ref="`myMarker${myIndex}`"
+      :ref="`myMarker${index}`"
       :position="myMarker.position"
       :clickable="true"
       :draggable="false"
@@ -433,7 +558,19 @@ onBeforeUnmount(() => {
       }"
       @click="openInfoWindow(myIndex)"
     />
+    <GMapMarker
+      v-for="(marker, index) in markers"
+      :key="index"
+      :ref="`marker${index}`"
+      :position="marker.position"
+      :clickable="true"
+      :draggable="false"
+     
+      @click="openInfoWindow(index)"
+    />
+    
   </GMapMap>
+
 </div>
 </template>
   

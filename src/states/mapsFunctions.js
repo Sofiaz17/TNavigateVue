@@ -8,6 +8,7 @@ const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 const markers = ref([])
 const myMarker = ref([])
+const endingPoint = ref('');
 
 //  function clearMarkers(){
 //     //markers.value.map((marker)=> toRaw(marker).setMap(null));
@@ -29,54 +30,100 @@ const myMarker = ref([])
 //         this.$refs[`marker${index}`] = null;
 //       }})}
 
-
-async function seeShops(){
-  
-    try{
-        while(markers.value.length > 0){
-            //console.log('POPPING: '  + 'length: ' + markers.value.length + ': '+markers.value);
+async function seeShops() {
+    try {
+        // Clear existing markers
+        while (markers.value.length > 0) {
             markers.value.pop();
         }
-        
-        // await fetchShops();
+
         const shopsSelf = [];
-        const geocodePromises = shops.value.map((shop) =>{
-            console.log('SHOP.ID: '+ shop.self)
+        const geocodePromises = shops.value.map((shop) => {
             shopsSelf.push(shop.self);
-            console.log('shopsIds: ' + shopsSelf);
-            return new Promise((resolve,reject) => {
+            return new Promise((resolve, reject) => {
                 geocode(shop.address, resolve, reject);
             });
         });
+
         const results = await Promise.all(geocodePromises);
 
-        results.forEach(function (result){
-           //console.log('Geocoding completed:', result.address_components);
-           //console.log('Geocoding completed:', result.geometry.location.lat(), ' ', result.geometry.location.lng());
-           console.log('Geocoding completed:', result);
-           let position = {
-             lat: result.geometry.location.lat(),
-             lng: result.geometry.location.lng()
+        for (let i = 0; i < results.length; i++) {
+            const result = results[i];
+            const shopSelf = shopsSelf[i];
+
+            console.log('Geocoding completed:', result);
+            const position = {
+                lat: result.geometry.location.lat(),
+                lng: result.geometry.location.lng()
             };
-            
+
             markers.value.push({
                 position: position
             });
 
-            markers.value.forEach((marker)=>console.log('MARKER: '+marker.position));
-            shopsSelf.forEach((self) =>{
+            console.log('COORD BEFORE:', position.lat, position.lng);
 
-            console.log('ARRAYSELF: '+ self );
-                updateCoordinates([result.geometry.location.lat(), result.geometry.location.lng()], self)}
-            )
-             
-           // markers.value[index].position.lng =  result.geometry.location.lng();
+            await updateCoordinates([position.lat, position.lng], shopSelf);
+
+            console.log('Updated coordinates for shop:', shopSelf);
+        }
+
+        markers.value.forEach((marker) => console.log('MARKER:', marker.position));
+
+    } catch (error) {
+        console.log('Error:', error);
+    }
+}
+// async function seeShops(){
+  
+//     try{
+//         while(markers.value.length > 0){
+//             //console.log('POPPING: '  + 'length: ' + markers.value.length + ': '+markers.value);
+//             markers.value.pop();
+//         }
+        
+//         // await fetchShops();
+//         const shopsSelf = [];
+//         const geocodePromises = shops.value.map((shop) =>{
+//             console.log('SHOP.ID: '+ shop.self)
+//             shopsSelf.push(shop.self);
+//             console.log('shopsIds: ' + shopsSelf);
+//             return new Promise((resolve,reject) => {
+//                 geocode(shop.address, resolve, reject);
+//             });
+//         });
+//         const results = await Promise.all(geocodePromises);
+
+//         await results.forEach(function (result, index){
+//            //console.log('Geocoding completed:', result.address_components);
+//            //console.log('Geocoding completed:', result.geometry.location.lat(), ' ', result.geometry.location.lng());
+//            console.log('Geocoding completed:', result);
+//            let position = {
+//              lat: result.geometry.location.lat(),
+//              lng: result.geometry.location.lng()
+//             };
             
-        })
-      } catch(error){
-          console.log('error: ' + error);
-      }
-}  
+//             markers.value.push({
+//                 position: position
+//             });
+
+//             markers.value.forEach((marker)=>console.log('MARKER: '+marker.position));
+//             // shopsSelf.forEach((self) =>{
+
+//             // console.log('ARRAYSELF: '+ self );
+//             //     updateCoordinates([result.geometry.location.lat(), result.geometry.location.lng()], self)}
+//             // )
+//             console.log('COORD BEFORE: ' + result.geometry.location.lat() + ' ' + result.geometry.location.lng() );
+          
+//             await updateCoordinates([result.geometry.location.lat(), result.geometry.location.lng()], shopsSelf[index]);
+             
+//            // markers.value[index].position.lng =  result.geometry.location.lng();
+            
+//         })
+//       } catch(error){
+//           console.log('error: ' + error);
+//       }
+// }  
 
 function geocode(request, resolve, reject) {
     console.log('geocoder entered');
@@ -97,6 +144,9 @@ function geocode(request, resolve, reject) {
     });
 }
 
+function showMultipleCategories(){
+
+}
 
  
 // function getRoute() {
@@ -157,4 +207,4 @@ function geocode(request, resolve, reject) {
 //   }
 
 
-export {seeShops, markers, myMarker,/* clearMarkers,*/ /*getRoute*/}
+export {seeShops, geocode, markers, myMarker,endingPoint/* clearMarkers,*/ /*getRoute*/}

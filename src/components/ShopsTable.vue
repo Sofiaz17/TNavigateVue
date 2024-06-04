@@ -81,8 +81,8 @@ async function toggleCategories() {
     </BCard>
   
   </div>
-  
   <div>
     <GMap :markers="markers" />
   </div>
+  
 </template> 

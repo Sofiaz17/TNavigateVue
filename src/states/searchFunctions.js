@@ -8,6 +8,7 @@ const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 const warningMessage = ref('')
 const searchSC = ref('')
 const categArray = ref([])
+const categObj = new Object();
 
 async function clearSearchSC(){
     return searchSC.value = ''
@@ -56,6 +57,15 @@ async function searchShopfromCat(category){
     }
       warningMessage.value = '';
       shops.value.sort((a, b) => a.name.localeCompare(b.name));
+      shops.value.forEach((shop)=>{
+        let keyCat = shop.name;
+        console.log('OBJ cat, name: '+ shop.category + ', ' +shop.name);
+        categObj[keyCat] = shop.category;
+      })
+
+      //console.log('map length: '+ Object.entries(categObj).length);
+      console.log('OBJ: ' + JSON.stringify(categObj,null,2));
+      
       categArray.value.push(shops.value);
       console.log('SHOPS: ' + shops.value);
       console.log('CATEGARRAY: ' );
