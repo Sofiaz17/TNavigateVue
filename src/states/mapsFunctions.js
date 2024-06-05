@@ -148,17 +148,116 @@ function geocode(request, resolve, reject) {
     });
 }
 
-function setEndingPoint(shop){
-    endingPoint.value = shop.name + ' / ' + shop.address + ' / ' + shop.coordinates;
-    console.log('ending point: ' + endingPoint.value);
-    console.log('AAAAAAA: ' + endingPoint.value.split(' / ')[2].split(',')[0]);
-    console.log('AAAAAAA: ' + endingPoint.value.split(' / ')[2].split(',')[1]);
-  }
+// function setEndingPoint(shop){
+//     endingPoint.value = shop.name + ' / ' + shop.address + ' / ' + shop.coordinates;
+//     console.log('ending point: ' + endingPoint.value);
+//     console.log('AAAAAAA: ' + endingPoint.value.split(' / ')[2].split(',')[0]);
+//     console.log('AAAAAAA: ' + endingPoint.value.split(' / ')[2].split(',')[1]);
+// }
+
+// function setMultipleEndingPoints(shop){
+//     const waypoints = []
+    
+//     waypoints.push(setEndingPoint(shop));
+//     waypoints.forEach((point) =>
+//         console.log('WAYPOINTS: ' + point)
+//     )
+//   }
   
-
-function showMultipleCategories(){
-
+  
+  function setEndingPoint(shop){
+    endingPoint.value = shop.name + ' / ' + shop.address + ' / ' + shop.coordinates;
+   
+    const lat = endingPoint.value.split(' / ')[2].split(',')[0];
+    const lng = endingPoint.value.split(' / ')[2].split(',')[1];
+    return { latitude: lat, longitude: lng };
 }
+
+const waypoints = [];
+
+function setMultipleEndingPoints(shop){
+        const point = setEndingPoint(shop);
+        waypoints.push(point);
+        waypoints.forEach((point)=> 
+            console.log('WAYPOINT: ' + point.latitude + ', ' + point.longitude)
+    )
+    return waypoints;
+}
+
+async function createRouteRequest(origin, destination) {
+    try{
+    // Define the basic structure of the request
+    let requestPayload = {
+      origin: {
+        location: {
+          latLng: {
+            latitude: origin.latitude,
+            longitude: origin.longitude
+          }
+        },
+        sideOfRoad: true
+      },
+      destination: {
+        location: {
+          latLng: {
+            latitude: destination.latitude,
+            longitude: destination.longitude
+          }
+        }
+      },
+      intermediates: [],
+      travelMode: "DRIVE",
+      routingPreference: "TRAFFIC_AWARE",
+      departureTime: new Date().toISOString(),
+      computeAlternativeRoutes: false,
+    //   routeModifiers: {
+    //     avoidTolls: false,
+    //     avoidHighways: false,
+    //     avoidFerries: false
+    //   },
+    //   languageCode: "en-US",
+    //   units: "IMPERIAL"
+    };
+    const response = await fetch(
+        'https://routes.googleapis.com/directions/v2:computeRoutes',
+        requestOptions
+      );
+      const data = await response.json();
+  
+      // check for error response
+      if (!response.ok) {
+        // get error message from body or default to response status
+        const error = (data && data.message) || response.status;
+        return Promise.reject(error);
+      }
+  
+      if (data.routes && data.routes[0] && data.routes[0].polyline) {
+        drawPolyline(data.routes[0].polyline.encodedPolyline);
+      }
+  
+      console.log('RESPONSE: ' + data.value);
+      console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
+   
+  
+    // Add each waypoint to the intermediates array
+    waypoints.forEach(waypoint => {
+      requestPayload.intermediates.push({
+        location: {
+          latLng: {
+            latitude: waypoint.latitude,
+            longitude: waypoint.longitude
+          }
+        }
+      });
+    });
+    
+    console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
+    return requestPayload;
+  } catch (error) {
+    console.error('There was an error!', error);
+  }
+}
+  
 
  
 // function getRoute() {
@@ -219,4 +318,4 @@ function showMultipleCategories(){
 //   }
 
 
-export {seeShops, geocode, setEndingPoint, clearEndingPoint, markers, myMarker,endingPoint/* clearMarkers,*/ /*getRoute*/}
+export {seeShops, geocode, setEndingPoint, clearEndingPoint, setMultipleEndingPoints, markers, myMarker,endingPoint/* clearMarkers,*/ /*getRoute*/}

@@ -145,18 +145,18 @@ async function searchShopByName(categToSearch){
 async function searchShopByProduct(categToSearch){
     console.log('searchShopByProduct ENTERED');
     //controllo di searchSC
- if (searchSC.value == '') {
+ if (searchSC.value == '' && categToSearch==undefined) {
     warningMessage.value = 'Inserisci un nome valido!';
     return;
   }
   warningMessage.value = ''
  try{
     console.log('SEARCHBYPROD categtosearch: ' + categToSearch);
-    //if(categToSearch==undefined){
+    if(categToSearch==undefined){
         categToSearch = await prodCategory();
             console.log('categToSearch value:'+ categToSearch);
             console.log('PROD searchSC.value:'+ searchSC.value);
-   // }
+   } 
     console.log('PROD, products.value.length: ' + products.value.length);
     if(products.value.length === 0){
         warningMessage.value = 'Nessun risultato';

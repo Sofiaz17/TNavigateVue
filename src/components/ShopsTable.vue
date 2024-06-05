@@ -37,13 +37,12 @@ async function toggleCategories() {
 </script>
 
 
-
- <template>
+<template>
   <form>
     <span style="color: red"> {{warningMessage}} </span>
   </form>
 
-  <div>
+  <div class="categories-list">
     <BCard>
     <BButton
       :class="visible ? null : 'collapsed'"
@@ -57,7 +56,7 @@ async function toggleCategories() {
   
     <BListGroup>
      
-      <BListGroupItem v-for="categ in categories.value" :key="categ.self">
+      <BListGroupItem v-for="categ in categories.value" :key="categ.self"  class="category-item">
         <div @click="searchShopfromCat(categ.name)">{{ categ.name }}</div>
         <ul v-for="(shop, index) in shops.value" :key="shop.self">
           <li v-if="shops.value[0].category == categ.name">
@@ -89,3 +88,19 @@ async function toggleCategories() {
   </div>
   
 </template> 
+
+<style scoped>
+.categories-list {
+  margin-bottom: 20px;
+}
+
+.category-item {
+  cursor: pointer;
+  padding: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.category-item:hover {
+  background-color: #f0f0f0;
+}
+</style>

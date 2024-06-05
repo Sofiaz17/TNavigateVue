@@ -4,7 +4,7 @@ import { shops, categories, products, fetchShops, fetchShopsName, fetchCategorie
 import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, searchShopByProduct, prodCategory, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
-import { seeShops, markers, setEndingPoint, clearEndingPoint/*, clearMarkers */} from '@/states/mapsFunctions.js'
+import { seeShops, markers, setEndingPoint, setMultipleEndingPoints, clearEndingPoint/*, clearMarkers */} from '@/states/mapsFunctions.js'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
@@ -17,8 +17,9 @@ onMounted( () => {
   clearShops();
   clearSearchSC();
   clearWarning();
- // clearMarkers();
- clearEndingPoint();
+  clearEndingPoint();
+  fetchProd();
+  fetchCategories();
 });
 
 const toggleVisibility = (index) => {
@@ -51,8 +52,9 @@ const toggleVisibility = (index) => {
             @click="toggleVisibility(index)">
               Informazioni
           </BButton>
+          <BButton @click="createRouteRequest()">MEGAROUTEEE</BButton>
           <BButton
-            @click="setEndingPoint(shop)">
+            @click="setMultipleEndingPoints(shop)">
               Seleziona come destinazione</BButton>
           <BCollapse id="collapse-4" v-model="visible[index]" class="mt-2">
               <ViewInformation v-if="shop" :shop="shop" />
@@ -60,6 +62,20 @@ const toggleVisibility = (index) => {
         </li>
      </BListGroupItem>
     </BListGroup>
+
+    <BCard>
+      <BListGroupItem v-for="(categ, index) in categories.value" :key="categ.self">
+        <h2>{{ categ.name }}</h2>
+        <ul v-for="(prod, index) in products.value" :key="prod.self"  >
+          <li v-if="prod.category==categ.name">
+            <a :href="HOST+prod.self">{{prod.name}}</a>
+            <BButton @click="searchShopByProduct(prod.category)"> Trova negozi! </BButton>
+          </li>
+        </ul>
+        
+      </BListGroupItem>
+     
+    </BCard>
     
     <div>
     <GMap :markers="markers" />
