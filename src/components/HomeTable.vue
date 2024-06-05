@@ -2,7 +2,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName} from '../states/shops.js'
 import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
-import { /*getRoute,*/ seeShops, markers,/*, clearMarkers */endingPoint} from '@/states/mapsFunctions.js'
+import { /*getRoute,*/ seeShops, markers, setEndingPoint, /*, clearMarkers */endingPoint, clearEndingPoint} from '@/states/mapsFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
 
@@ -22,6 +22,7 @@ onMounted( () => {
   clearShops();
   clearSearchSC();
   clearWarning();
+  clearEndingPoint();
   
  // clearMarkers();
   //reinitializeMap();
@@ -49,12 +50,6 @@ const toggleVisibility= (index)  => {
 //  // mapRef.value.geolocate();
 }
 
-function setEndingPoint(shop){
-  endingPoint.value = shop.name + ' / ' + shop.address + ' / ' + shop.coordinates;
-  console.log('ending point: ' + endingPoint.value);
-  console.log('AAAAAAA: ' + endingPoint.value.split(' / ')[2].split(',')[0]);
-  console.log('AAAAAAA: ' + endingPoint.value.split(' / ')[2].split(',')[1]);
-}
 
 
 

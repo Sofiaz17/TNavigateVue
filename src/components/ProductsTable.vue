@@ -4,7 +4,7 @@ import { shops, categories, products, fetchShops, fetchShopsName, fetchCategorie
 import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, searchShopByProduct, prodCategory, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
-import { seeShops, markers/*, clearMarkers */} from '@/states/mapsFunctions.js'
+import { seeShops, markers, setEndingPoint, clearEndingPoint/*, clearMarkers */} from '@/states/mapsFunctions.js'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
@@ -18,6 +18,7 @@ onMounted( () => {
   clearSearchSC();
   clearWarning();
  // clearMarkers();
+ clearEndingPoint();
 });
 
 const toggleVisibility = (index) => {
@@ -50,7 +51,9 @@ const toggleVisibility = (index) => {
             @click="toggleVisibility(index)">
               Informazioni
           </BButton>
-        
+          <BButton
+            @click="setEndingPoint(shop)">
+              Seleziona come destinazione</BButton>
           <BCollapse id="collapse-4" v-model="visible[index]" class="mt-2">
               <ViewInformation v-if="shop" :shop="shop" />
           </BCollapse>

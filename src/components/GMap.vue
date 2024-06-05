@@ -2,6 +2,7 @@
   import { defineProps, onUpdated } from 'vue'
   import { ref, defineExpose, onMounted, watch, computed, onBeforeUnmount } from 'vue'
   import { markers, myMarker, endingPoint, geocode } from '@/states/mapsFunctions'
+  import { clearWarning, warningMessage } from '@/states/searchFunctions'
   import myPin from '@/components/icons/myPin.png'
 
   watch(markers, (oldMarkers, newMarkers) =>{
@@ -47,7 +48,10 @@
     //   this.geolocate();
     // };
     onMounted( () =>{
+      clearWarning();
       reinitializeMap();
+      //console.log('IS GPS?: '+  navigator.geolocation.getCurrentPosition(  (position) => {
+      //  console.log('in geolocate');}));
      
         console.log('gmap onmounted');
        
@@ -81,18 +85,7 @@
     }
 }
 
-async function getDestinationCoordinates() {
-  try {
-    console.log('GETCOORD: ' + endingPoint.value);
-    let result = await new Promise((resolve, reject) => {
-      geocode(endingPoint.value, resolve, reject);
-    });
-    console.log('RESULT: '+ result);
-    return result;
-  } catch (error) {
-    console.log('error: ' + error);
-  }
-}
+
 
 
 
@@ -115,10 +108,31 @@ async function geolocate() {
         myMarker.value.push({ position: center.value });
         resolve();
       },
-      (error) => {
-        console.error('Error getting geolocation:', error);
-        reject(error);
-      }
+      // (error) => {
+      //   console.error('Error getting geolocation:', error);
+      //   reject(error);
+        error => {
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            console.error("User denied the request for Geolocation.");
+                            warningMessage.value = 'Permesso per la geolocalizzazione non attivo';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            console.error("Location information is unavailable.");
+                            warningMessage.value = 'Informazioni sulla location non disponibili';
+                            break;
+                        case error.TIMEOUT:
+                            console.error("The request to get user location timed out.");
+                            warningMessage.value = 'Il permesso per la geolocalizzazione è scaduto';
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            console.error("An unknown error occurred.");
+                            warningMessage.value = 'Errore. Ritenta.';
+                            break;
+                    }
+                    reject(error);
+                }
+      
     );
   });
 }
@@ -522,6 +536,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div>
+    
     <form @submit.prevent="getRoute">
       <div>
         <label for="start-point">Partenza: <i>la tua posizione</i></label>

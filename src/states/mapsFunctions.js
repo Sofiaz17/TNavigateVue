@@ -10,6 +10,10 @@ const markers = ref([])
 const myMarker = ref([])
 const endingPoint = ref('');
 
+async function clearEndingPoint(){
+    return endingPoint.value = ''
+}
+
 //  function clearMarkers(){
 //     //markers.value.map((marker)=> toRaw(marker).setMap(null));
 //     // markers.value.length = 0;
@@ -144,6 +148,14 @@ function geocode(request, resolve, reject) {
     });
 }
 
+function setEndingPoint(shop){
+    endingPoint.value = shop.name + ' / ' + shop.address + ' / ' + shop.coordinates;
+    console.log('ending point: ' + endingPoint.value);
+    console.log('AAAAAAA: ' + endingPoint.value.split(' / ')[2].split(',')[0]);
+    console.log('AAAAAAA: ' + endingPoint.value.split(' / ')[2].split(',')[1]);
+  }
+  
+
 function showMultipleCategories(){
 
 }
@@ -207,4 +219,4 @@ function showMultipleCategories(){
 //   }
 
 
-export {seeShops, geocode, markers, myMarker,endingPoint/* clearMarkers,*/ /*getRoute*/}
+export {seeShops, geocode, setEndingPoint, clearEndingPoint, markers, myMarker,endingPoint/* clearMarkers,*/ /*getRoute*/}
