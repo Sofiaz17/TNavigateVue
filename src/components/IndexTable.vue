@@ -4,7 +4,7 @@ import { ref, onMounted, watch } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName} from '../states/shops.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
-import { seeShops, markers, setEndingPoint, clearEndingPoint, /*, clearMarkers */} from '@/states/mapsFunctions.js'
+import { seeShops, markers, setEndingPoint, clearWaypoints, clearEndingPoint, /*, clearMarkers */} from '@/states/mapsFunctions.js'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
@@ -20,6 +20,7 @@ onMounted( () => {
   clearWarning();
 //  clearMarkers();
   clearEndingPoint()
+  clearWaypoints();
 });
 
 const toggleVisibility = (index) => {

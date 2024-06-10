@@ -1,7 +1,7 @@
 <script setup>
   import { defineProps, onUpdated } from 'vue'
   import { ref, defineExpose, onMounted, watch, computed, onBeforeUnmount } from 'vue'
-  import { markers, myMarker, endingPoint, geocode } from '@/states/mapsFunctions'
+  import { markers, myMarker, endingPoint, waypoints, routeDuration, clearRouteDuration, geocode, setEndingPoint } from '@/states/mapsFunctions'
   import { clearWarning, warningMessage } from '@/states/searchFunctions'
   import myPin from '@/components/icons/myPin.png'
 
@@ -9,6 +9,8 @@
     console.log('WATCHING...');
     clearMarkers();
   } )
+
+  
 
 
   const props = defineProps({
@@ -61,6 +63,7 @@
         
       });
       clearMarkers();
+      clearRouteDuration();
    
       //initMap();
       //geolocate();
@@ -71,17 +74,20 @@
     // for (let i = 0; i < markers.value.length; i++) {
     //   markers.value[i].setMap(null);
     // }
-    if(markers.value.length!=0){
-    markers.value = [];
-    console.log('markers before: ' + markers.value);
-    //markers.value.forEach((marker)=> marker.setMap(null))
-    //this.markers.map((marker) => toRaw(marker).setMap(null))
-    markers.value.length = 0;
-    console.log('markers after: '+ markers.value);
-    console.log('markers.value.length: ' + markers.value.length);
-    //this.$refs.map.$mapObject.clearMarkers(); //or 
-    //this.$refs['map'].$mapObject.clearMarkers();
-    return; 
+    console.log('WAYPOINTS IN CLEAR: ' + waypoints.value.length);
+    if(waypoints.value.length==0){
+      if(markers.value.length!=0){
+      markers.value = [];
+      console.log('markers before: ' + markers.value);
+      //markers.value.forEach((marker)=> marker.setMap(null))
+      //this.markers.map((marker) => toRaw(marker).setMap(null))
+      markers.value.length = 0;
+      console.log('markers after: '+ markers.value);
+      console.log('markers.value.length: ' + markers.value.length);
+      //this.$refs.map.$mapObject.clearMarkers(); //or 
+      //this.$refs['map'].$mapObject.clearMarkers();
+      return; 
+      }
     }
 }
 
@@ -259,12 +265,16 @@ function reinitializeMap() {
   //       });
   //   }
 
-    function drawPolyline(encodedPolyline) {
+    function drawPolyline(encodedPolyline, data) {
+      console.log('drawpolyline called');
     //console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
       const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
-      if (polyline) {
-        polyline.setMap(null);
+      if (!data.routes[0].legs) {
+        if (polyline) {
+          polyline.setMap(null);
+        }
       }
+  
       polyline = new google.maps.Polyline({
         path: path,
         geodesic: true,
@@ -275,12 +285,41 @@ function reinitializeMap() {
       polyline.setMap(mapRef.value.map);
     }
 
+  function getCESTISOString() {
+      let currentDate = new Date();
+  
+    // Get the time zone offset in minutes and convert it to milliseconds
+    let offset = currentDate.getTimezoneOffset() * 60000;
+  
+    // Adjust for CEST (UTC+2 during daylight saving time)
+    let cestOffset = 2 * 60 * 60000; // 2 hours in milliseconds
+
+    // Create a new date object with the adjusted time
+    let cestDate = new Date(currentDate.getTime() + offset + cestOffset);
+    console.log('CEST: ' +cestDate.toISOString().replace('Z', '+02:00'))
+
+    return cestDate.toISOString().replace('Z', '-02:00');
+}
+
+
+
   async function getRoute() {
   try {
     await geolocate();
     console.log(
-      'GET ROUTE: start' + center.value.lat + ' ,' + center.value.lng
+      'GET ROUTE: start: ' + center.value.lat + ', ' + center.value.lng
     );
+    console.log(
+      'GET ROUTE: end: ' + parseFloat(endingPoint.value.split(' / ')[2].split(',')[0]) + ', ' + parseFloat(endingPoint.value.split(' / ')[2].split(',')[1])
+    );
+    console.log(
+      'GET ROUTE: date: ' +new Date().toISOString()
+    );
+ 
+
+//console.log(getCESTISOString());
+
+
     // POST request using fetch with error handling
     const requestOptions = {
       method: 'POST',
@@ -302,14 +341,14 @@ function reinitializeMap() {
         destination: {
           location: {
             latLng: {
-              latitude: endingPoint.value.split(' / ')[2].split(',')[0],
-              longitude:  endingPoint.value.split(' / ')[2].split(',')[1]
+              latitude: parseFloat(endingPoint.value.split(' / ')[2].split(',')[0]),
+              longitude:  parseFloat(endingPoint.value.split(' / ')[2].split(',')[1])
             },
           },
         },
         travelMode: 'DRIVE',
         routingPreference: 'TRAFFIC_AWARE',
-        departureTime: new Date().toISOString(),
+        departureTime: getCESTISOString(),
         computeAlternativeRoutes: false,
       }),
     };
@@ -327,11 +366,147 @@ function reinitializeMap() {
     }
 
     if (data.routes && data.routes[0] && data.routes[0].polyline) {
-      drawPolyline(data.routes[0].polyline.encodedPolyline);
+     
+      let date = new Date(durationToNumber(data.routes[0].duration));
+      console.log('dATE:'+durationToNumber(data.routes[0].duration));
+      console.log('SINGLE ROUTE DURATION: '+ date.toLocaleTimeString('it-IT'));
+
+      routeDuration.value.push(date.toLocaleTimeString('it-IT'));
+      
+      drawPolyline(data.routes[0].polyline.encodedPolyline,data);
     }
 
     console.log('RESPONSE: ' + data.value);
     console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('There was an error!', error);
+  }
+}
+
+function durationToNumber(str) {
+  // Check if the string is valid and ends with 's'
+  if (str.length > 0 && str[str.length - 1] === 's') {
+    // Remove the last character 's'
+    const newStr = str.slice(0, -1);
+    return parseFloat(newStr);
+    // Get the Unicode number of the first character
+    const firstCharUnicode = newStr.charCodeAt(0);
+    return {
+      firstCharUnicode,
+      newStr
+    };
+  } }
+
+  // function getWaypointsCoord(){
+  //   waypoints.value.forEach((point)=>{
+  //     parseFloat(point.split(' / ')[2].split(',')[0])
+      
+  //   })
+  // }
+  function getWaypointsCoord() {
+  return waypoints.value.map((point) => {
+    const coords = point.split(' / ')[2].split(',');
+    return {
+      location: {
+        latLng: {
+          latitude: parseFloat(coords[0]),
+          longitude: parseFloat(coords[1])
+        }
+      }
+    };
+  });
+}
+
+function getDestination() {
+  const lastWaypoint = waypoints.value[waypoints.value.length - 1];
+  const coords = lastWaypoint.split(' / ')[2].split(',');
+  return {
+    location: {
+      latLng: {
+        latitude: parseFloat(coords[0]),
+        longitude: parseFloat(coords[1])
+      }
+    }
+  };
+}
+
+async function getMultipointRoute() {
+  try {
+    await geolocate();
+    console.log(
+      'GET ROUTE: start' + center.value.lat + ' ,' + center.value.lng
+    );
+    // POST request using fetch with error handling
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': import.meta.env.VITE_API_KEY,
+        'X-Goog-FieldMask':
+          'routes.duration,routes.distanceMeters,routes.legs,routes.legs.polyline.encodedPolyline',
+      },
+      body: JSON.stringify({
+        origin: {
+          location: {
+            latLng: {
+              latitude: center.value.lat,
+              longitude: center.value.lng
+            },
+          },
+        },
+        destination: getDestination(),
+        intermediates: getWaypointsCoord(),
+        travelMode: 'DRIVE',
+        routingPreference: 'TRAFFIC_AWARE',
+        departureTime: getCESTISOString(),
+        computeAlternativeRoutes: false,
+      }),
+    };
+    const response = await fetch(
+      'https://routes.googleapis.com/directions/v2:computeRoutes',
+      requestOptions
+    );
+    const data = await response.json();
+
+    // check for error response
+    if (!response.ok) {
+      // get error message from body or default to response status
+      const error = (data && data.message) || response.status;
+      return Promise.reject(error);
+    }
+
+    // if (data.routes && data.routes[0] && data.routes[0].polyline) {
+    //   drawPolyline(data.routes[0].polyline.encodedPolyline);
+    // }
+    // if (data.routes && data.routes[0] && data.routes[0].legs) {
+    //   console.log('ROUTE:', data.routes[0].legs.length);
+    //   console.log('ROUTE:', data.routes[0].legs);
+    //   for(let i=0;i<data.routes[0].legs.length;i++){
+    //     drawPolyline(data.routes[0].legs[i].polyline.encodedPolyline)
+    //   }
+    //   // data.routes[0].legs.forEach(
+    //   //   drawPolyline(data.routes[0].polyline.encodedPolyline)
+    //   // )
+    //   // if (data.routes[0].polyline) {
+    //   //   drawPolyline(data.routes[0].polyline.encodedPolyline);
+    //   // }
+    // }
+    
+    if (data.routes && data.routes[0] && data.routes[0].legs) {
+      console.log('ROUTE:', data.routes[0].legs.length);
+      console.log('ROUTE:', data.routes[0].legs);
+      data.routes[0].legs.forEach((leg) => {
+        console.log('LEG DURATION: ' + leg.localizedValues.duration.text);
+        routeDuration.value.push(leg.localizedValues.duration.text);
+        if (leg.polyline && leg.polyline.encodedPolyline) {
+          drawPolyline(leg.polyline.encodedPolyline,data);
+        }
+      });
+    }
+
+
+    // console.log('RESPONSE: ' + data.value);
+    // console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
   } catch (error) {
     console.error('There was an error!', error);
   }
@@ -528,6 +703,9 @@ function reinitializeMap() {
 //defineExpose({geolocate})
 //export {geolocate}
 
+
+
+
 onBeforeUnmount(() => {
   console.log('onBeforeUnmount');
   clearMarkers();
@@ -537,15 +715,30 @@ onBeforeUnmount(() => {
 <template>
   <div>
     
-    <form @submit.prevent="getRoute">
+     <form @submit.prevent="getRoute" v-if="waypoints.length==0">
       <div>
         <label for="start-point">Partenza: <i>la tua posizione</i></label>
       </div>
       <div>
-        <label for="end-point">Destinazione: <em> {{ endingPoint }} </em></label>
-        <!-- <input id="end-point" v-model="endPoint" type="text" required /> -->
+        <label for="end-point">Destinazione: <em> {{ endingPoint }} </em> Durata: {{ routeDuration[0] }}</label>
+       
       </div>
-      <!-- <button @click='getRoute()'> Calcola percorso </button> -->
+     
+      <button type="submit">Calcola percorso</button>
+    </form>
+   <form @submit.prevent="getMultipointRoute" v-else>
+      <div>
+        <label for="start-point">Partenza: <i>la tua posizione</i></label>
+      </div>
+      <div  v-for="(point, index) in waypoints">
+        <label v-if="index == waypoints.length-1" for="end-point">Destinazione: <em> {{ waypoints[waypoints.length-1] }} Durata: {{ routeDuration[index] }}</em></label>
+        <label v-else for="way-point">Waypoint {{ index }}: <em> {{ point }} </em> Durata: {{ routeDuration[index] }}</label>
+      </div>
+      <!-- <div>
+        <label for="end-point">Destinazione: <em> {{ waypoints[waypoints.length-1] }} </em></label>
+       
+      </div> -->
+    
       <button type="submit">Calcola percorso</button>
     </form>
   <GMapMap
@@ -559,6 +752,7 @@ onBeforeUnmount(() => {
  
   <button @click='geolocate()'> Geolocate </button>
   <button @click='reinitializeMap()'> InitMap </button>
+  <button @click='getMultipointRoute()'> Multipoint route </button>
 
   <GMapMarker
       v-for="(myMarker, index) in myMarker"

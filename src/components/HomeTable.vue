@@ -2,7 +2,7 @@
 import { ref, onMounted, watch, computed } from 'vue'
 import { shops, categories, products, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName} from '../states/shops.js'
 import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, isCategory, searchShopByName, capitalizeFirstLetter, searchShopfromCat,/* toggleShops,*//* toggleCategories, */warningMessage, searchSC} from '../states/searchFunctions.js'
-import { /*getRoute,*/ seeShops, markers, setEndingPoint, /*, clearMarkers */endingPoint, clearEndingPoint} from '@/states/mapsFunctions.js'
+import { /*getRoute,*/ seeShops, markers, setEndingPoint,clearWaypoints, setWaypoints, /*, clearMarkers */endingPoint, clearEndingPoint} from '@/states/mapsFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
 
@@ -23,6 +23,7 @@ onMounted( () => {
   clearSearchSC();
   clearWarning();
   clearEndingPoint();
+  clearWaypoints();
   
  // clearMarkers();
   //reinitializeMap();
@@ -123,6 +124,11 @@ const toggleVisibility= (index)  => {
           <BButton
             @click="setEndingPoint(shop)">
               Seleziona come destinazione</BButton>
+              <BButton
+            @click="setWaypoints(shop)">
+              Seleziona come waypoint</BButton>
+              
+
           <BCollapse id="collapse-4" v-model="visible[index]" class="b-collapse mt-2">
             <ViewInformation v-if="shop" :shop="shop" />
           </BCollapse>

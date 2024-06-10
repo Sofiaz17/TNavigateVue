@@ -4,7 +4,7 @@ import { ref, onMounted } from 'vue'
 import { shops, categories, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg} from '../states/shops.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
-import { seeShops, markers, setEndingPoint, clearEndingPoint/*, clearMarkers */} from '@/states/mapsFunctions.js'
+import { seeShops, markers, setEndingPoint, clearWaypoints, clearEndingPoint/*, clearMarkers */} from '@/states/mapsFunctions.js'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
@@ -20,6 +20,7 @@ onMounted( () => {
   clearSearchSC();
   clearWarning();
   clearEndingPoint();
+  clearWaypoints();
  // clearMarkers();  //not working
 })
 
