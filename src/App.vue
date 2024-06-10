@@ -8,10 +8,22 @@ import { RouterLink, RouterView } from 'vue-router'
 </script>
 
 <template>
-  <header>
-    <img alt="TNavigate logo" class="logo" src="./assets/logo_nonDef.jpg" width="400" height="125" />
 
-    <div class="wrapper">
+<head>
+   
+
+</head>
+<body>
+
+  <header class="headerhome">
+    <div class="headertext">
+        <a>
+            <img alt="TNavigate logo" src="./assets/TNavigate_logo_noBkgr.png" style="width: 20%; margin-bottom: 2em;">
+        </a>
+    </div>
+    <!-- <img alt="TNavigate logo" class="logo" src="./assets/TNavigate_logo_noBkgr.png" width="250" height="125" /> -->
+
+    <div class="topnav" id="barrapulsanti">
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
@@ -21,37 +33,24 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterLink to="/signup">Registrati</RouterLink>
         <RouterLink to="/index">Indice negozi</RouterLink>
       </nav>
-      
     </div>
   </header>
-
+ 
+  <main>
     <RouterView />
-<!-- <body> <GMapMap
-      :center="{ lat: 46.067546, lng: 11.121488 }", 
-      :zoom="15" 
-      map-type-id="roadmap" 
-      style="width: 450px; height: 450px"
-      :options="{
-        zoomControl: true,
-        mapTypeControl: true,
-        scaleControl: true,
-        streetViewControl: true,
-        rotateControl: true,
-        fullscreenControl: true
-      }"
-    /></body> -->
-  <!-- <main>
-    <TheWelcome />
-  </main> -->
+    <!-- <TheWelcome /> -->
+  </main> 
+</body>
 
   <footer>Non so cosa scrivere nel footer</footer>
 </template>
 
 
 <style scoped>
-@import '@/assets/base.css';
+/* @import '@/assets/base.css'; */
+@import '@/assets/style.css';
 
-#app {
+/* #app {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
@@ -143,5 +142,5 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
-}
+} */
 </style>

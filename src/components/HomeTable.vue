@@ -94,12 +94,11 @@ const toggleVisibility= (index)  => {
   </div>
      -->
 
-  
-
-<div class="container">
-  <div class="left-column">
-    <h1>Cerca negozio per nome o per categoria:</h1>
-    <div class="search-bar">
+  <div class="containerwhite" style="padding-bottom: 4em;">
+    <div class="left-column">
+      <h2 class="headerh2">Cerca un negozio!</h2>
+        <h3 class="headerh3">Scrivi il nome o la categoria</h3> 
+      <div class="search-bar">
       <input type="text" v-model="searchSC" placeholder="Cerca negozio o categoria" @keyup.enter="searchShopByName()" />
       <button @click="searchShopByName()">Cerca</button>
     </div>
@@ -146,21 +145,21 @@ const toggleVisibility= (index)  => {
 
 <style>
 /* Assuming you have a navbar */
-.navbar {
+/* .navbar {
   position: fixed;
   top: 0;
   width: 100%;
-  background-color: #f8f9fa; /* Adjust this color to match your navbar */
-  z-index: 1000; /* Ensure it stays on top */
+  background-color: #f8f9fa; 
+  z-index: 1000;
   padding: 10px 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
+} */
 
 /* Container for the search and map section */
-.container {
+/* .container {
   display: flex;
   justify-content: space-between;
-  margin-top: 70px; /* Adjust based on your navbar height */
+  margin-top: 70px; 
   padding: 20px;
 }
 
@@ -172,19 +171,19 @@ const toggleVisibility= (index)  => {
 .right-column {
   width: 45%;
   padding: 2%;
-}
+} */
   /* 
 
 /* Search section */
 .search-section {
   flex: 1;
-  max-width: 400px; /* Adjust based on preference */
+  max-width: 400px; 
 }
 
 /* Map section */
 .map-section {
   flex: 2;
-  margin-left: 20px; /* Space between search and map */
+  margin-left: 20px; 
 }
 
 /* Styling the search bar and button */
@@ -200,22 +199,25 @@ const toggleVisibility= (index)  => {
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  margin-right: 10px; /* Added to provide spacing between input and button */
+  box-sizing: border-box;
 }
 
 .search-bar button {
-  padding: 10px 20px;
+  padding: 10px 10px;
   font-size: 16px;
   margin-left: 10px;
   border: none;
-  background-color: #03c9db;
+  background-color: #006890;
   color: white;
   border-radius: 4px;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .search-bar button:hover {
-  background-color: #0056b3;
-}
+  background-color: #84B824;
+} 
 
 /* Styling the list group */
 .b-list-group {
@@ -236,16 +238,16 @@ const toggleVisibility= (index)  => {
 }
 
 .b-list-group-item a {
-  color: #007bff;
+  color: #0092D1;
   text-decoration: none;
 }
 
 .b-list-group-item a:hover {
   text-decoration: underline;
-}
+} 
 
 /* Collapse button */
-.b-button {
+ .b-button {
   margin-top: 10px;
   padding: 8px 12px;
   font-size: 14px;
@@ -257,19 +259,19 @@ const toggleVisibility= (index)  => {
 }
 
 .b-button.collapsed {
-  background-color: #0056b3;
+  background-color: #006890;
 }
 
 .b-button:hover {
-  background-color: #0056b3;
+  background-color: #84B824;
 }
 
-/* Collapse content */
+
 .b-collapse {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-top: 10px;
-}
+} 
 
 </style>
