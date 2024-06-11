@@ -10,8 +10,6 @@
     clearMarkers();
   } )
 
-  
-
 
   const props = defineProps({
       mycenter: {
@@ -42,19 +40,11 @@
   const center = ref(props.mycenter);
   const mapRef = ref(null);
   let polyline = null;
-  //const map = ref(null);
-    // onMounted() {
-    //   this.$refs.mapRef.$mapPromise.then((mapObject) => {
-    //     console.log('map is loaded now', mapObject);
-    //   });
-    //   this.geolocate();
-    // };
+  
     onMounted( () =>{
       clearWarning();
       reinitializeMap();
-      //console.log('IS GPS?: '+  navigator.geolocation.getCurrentPosition(  (position) => {
-      //  console.log('in geolocate');}));
-     
+  
         console.log('gmap onmounted');
        
       mapRef.value.$mapPromise.then((mapObject) => {
@@ -65,15 +55,11 @@
       clearMarkers();
       clearRouteDuration();
    
-      //initMap();
-      //geolocate();
-      //this.geolocate();
+      
     });
 
   function clearMarkers(){
-    // for (let i = 0; i < markers.value.length; i++) {
-    //   markers.value[i].setMap(null);
-    // }
+   
     console.log('WAYPOINTS IN CLEAR: ' + waypoints.value.length);
     if(waypoints.value.length==0){
       if(markers.value.length!=0){
@@ -724,14 +710,17 @@ onBeforeUnmount(() => {
        
       </div>
      
-      <button type="submit">Calcola percorso</button>
+      <button type="submit" class="b-button">Calcola percorso</button>
     </form>
    <form @submit.prevent="getMultipointRoute" v-else>
       <div>
         <label for="start-point">Partenza: <i>la tua posizione</i></label>
       </div>
       <div  v-for="(point, index) in waypoints">
-        <label v-if="index == waypoints.length-1" for="end-point">Destinazione: <em> {{ waypoints[waypoints.length-1] }} Durata: {{ routeDuration[index] }}</em></label>
+        <label v-if="index == waypoints.length-1" for="end-point">
+            Destinazione: <em> {{ waypoints[waypoints.length-1] }} </em>
+              <br><em>Durata: {{ routeDuration[index] }}</em>
+        </label>
         <label v-else for="way-point">Waypoint {{ index }}: <em> {{ point }} </em> Durata: {{ routeDuration[index] }}</label>
       </div>
       <!-- <div>
@@ -739,8 +728,9 @@ onBeforeUnmount(() => {
        
       </div> -->
     
-      <button type="submit">Calcola percorso</button>
+      <button type="submit" class="b-button">Calcola percorso</button>
     </form>
+    <button @click='getMultipointRoute()' class="b-button"> Multipoint route </button>
   <GMapMap
     ref="mapRef"
     :center="mycenter"
@@ -750,9 +740,9 @@ onBeforeUnmount(() => {
     :options="mapOptions"
   >
  
-  <button @click='geolocate()'> Geolocate </button>
-  <button @click='reinitializeMap()'> InitMap </button>
-  <button @click='getMultipointRoute()'> Multipoint route </button>
+  <!-- <button @click='geolocate()'> Geolocate </button>
+  <button @click='reinitializeMap()'> InitMap </button> -->
+ 
 
   <GMapMarker
       v-for="(myMarker, index) in myMarker"
@@ -783,7 +773,32 @@ onBeforeUnmount(() => {
 </div>
 </template>
   
-  <style scoped>
-  /* Add any necessary styling here */
-  </style>
-  
+  <style>
+ @import '/src/assets/style.css'; 
+
+.b-button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  background-color: #006890 !important;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.b-button.collapsed {
+  background-color: #006890 !important;
+}
+
+.b-button:hover {
+  background-color: #84B824 !important; 
+}
+
+.b-collapse {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+</style>

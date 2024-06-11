@@ -58,7 +58,9 @@ const toggleVisibility= (index)  => {
 
 
 <template>
-
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
   <!-- <br/>
   <h1>Cerca negozio per nome o per categoria:</h1>
   <br/>
@@ -121,10 +123,12 @@ const toggleVisibility= (index)  => {
             Informazioni
           </BButton>
           <BButton
-            @click="setEndingPoint(shop)">
+            @click="setEndingPoint(shop)"
+            class="b-button">
               Seleziona come destinazione</BButton>
               <BButton
-            @click="setWaypoints(shop)">
+            @click="setWaypoints(shop)"
+            class="b-button">
               Seleziona come waypoint</BButton>
               
 
@@ -144,6 +148,7 @@ const toggleVisibility= (index)  => {
 </template>
 
 <style>
+
 /* Assuming you have a navbar */
 /* .navbar {
   position: fixed;
@@ -245,33 +250,30 @@ const toggleVisibility= (index)  => {
 .b-list-group-item a:hover {
   text-decoration: underline;
 } 
-
-/* Collapse button */
- .b-button {
+.b-button {
   margin-top: 10px;
   padding: 8px 12px;
   font-size: 14px;
   border: none;
-  background-color: #03c9db;
+  background-color: #006890 !important;
   color: white;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .b-button.collapsed {
-  background-color: #006890;
+  background-color: #006890 !important;
 }
 
 .b-button:hover {
-  background-color: #84B824;
+  background-color: #84B824 !important; 
 }
-
 
 .b-collapse {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   margin-top: 10px;
-} 
+}
 
 </style>

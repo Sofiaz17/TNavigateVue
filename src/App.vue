@@ -10,12 +10,13 @@ import { RouterLink, RouterView } from 'vue-router'
 <template>
 
 <head>
-   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 </head>
 <body>
 
   <header class="headerhome">
+    
     <div class="headertext">
         <a>
             <img alt="TNavigate logo" src="./assets/TNavigate_logo_noBkgr.png" style="width: 20%; margin-bottom: 2em;">
@@ -42,13 +43,13 @@ import { RouterLink, RouterView } from 'vue-router'
   </main> 
 </body>
 
-  <footer>Non so cosa scrivere nel footer</footer>
+  <footer></footer>
 </template>
 
 
 <style scoped>
 /* @import '@/assets/base.css'; */
-@import '@/assets/style.css';
+@import './assets/style.css';
 
 /* #app {
   max-width: 1280px;

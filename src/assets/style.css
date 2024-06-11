@@ -91,14 +91,16 @@
     background-color: var(--black);
   }
   
+  
   .left-column {
-    width: 45%;
-    padding: 2%;
+    width: 48%;
+    padding: 1%;
   }
   
   .right-column {
-    width: 45%;
-    padding: 2%;
+    width: 48%;
+    padding: 1%;
+    align-items: start;
   }
   
   .column-3{
@@ -111,28 +113,7 @@
     align-items: center;
     text-align: center;
   }
-  
-  .imgclass{
-    max-width: 100%;
-    height: auto;
-    border-radius: var(--rad);
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-  }
-  
-  .card{
-    max-width: 100%;
-    height: auto;
-    background-color: var(--yellow);
-    border-radius: var(--rad);
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-  }
-  
-  .left-logo-footer{
-    max-width: 8em;
-    height: auto;
-    float: right;
-    border-radius: var(--rad);
-  }
+
   
   .topnav {
     overflow: hidden;
@@ -196,7 +177,6 @@
   .headerhome{
     padding-top:2em;
     padding-bottom:3em;
-    background-size: cover;
     background-position-y: center;
   }
   btnheader{}
@@ -289,28 +269,6 @@
     width: auto;
   }
   
-  .register-container{
-    background-color: var(--yellow);
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    margin: 100px auto;
-    max-width: 700px;
-    padding: 3em;
-    text-align: center;
-    align-items: center;
-  }
-  
-  
-  .login-container{
-    background-color: var(--yellow);
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    margin: 100px auto;
-    max-width: 400px;
-    padding: 2em;
-    text-align: center;
-    align-items: center;
-  }
   
   label {
     display: block;
@@ -319,16 +277,6 @@
     border-radius: var(--rad);
   }
   
-  input[type="text"], input[type="date"], input[type="option"], input[type="password"] {
-    background-color: white;
-    border: none;
-    border-radius: var(--rad);
-    box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    font-size: 16px;
-    margin-bottom: 20px;
-    padding: 10px;
-    width: 80%;
-  }
   
   select{
     background-color: white;
@@ -340,7 +288,8 @@
     padding: 10px;
     width: 80%;
   }
-  
+
+
   .wrapper{
     position: fixed;
     bottom: 30px;
