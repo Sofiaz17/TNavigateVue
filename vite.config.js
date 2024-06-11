@@ -19,6 +19,10 @@ export default defineConfig({
       "@fawmi/vue-google-maps",
       "fast-deep-equal",
     ],
-  }
+  },
+// base: process.env.BASE_PATH || '/'
+  base: process.env.NODE_ENV === 'production'
+          ? '/TNavigateApp/' // prod
+          : '/', // dev
 })
 
