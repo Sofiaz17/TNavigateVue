@@ -8,7 +8,7 @@ const API_URL = HOST+`/api/v1`
 const email = ref('mario.rossi@unitn.com')
 const password = ref('123')
 
-const loggedUser = ref({})
+
 //const loggedUser = defineProps(['loggedUser'])
 const emit = defineEmits(['login'])
 
@@ -49,7 +49,7 @@ function logout() {
     <span v-if="!loggedUser.token">
       <input name="email" v-model="email" />
       <input name="password" v-model="password" />
-      <button type="button" @click="login">LogIn</button>
+      <button type="button" @click="login()">LogIn</button>
     </span>
   </form>
 </template>
