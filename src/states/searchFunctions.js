@@ -172,22 +172,7 @@ async function searchShopByProduct(categToSearch){
 
 }
 
-// //searches shop by product user input
-// async function searchShopByProduct(categToSearch) {           //called 4 times before fetching
-//     console.log("searchShopByProduct called");
 
-// const ul = document.getElementById('results'); 
-
-// ul.textContent = '';
-
-// if(categToSearch==undefined){
-// categToSearch = await prodCategory();
-// console.log('categtosearch: ' + categToSearch);
-// }
-
-// searchShopByName(categToSearch);
-
-// }
 
 async function prodCategory(){
     try{
@@ -210,31 +195,9 @@ async function prodCategory(){
     }
 
 
-// //fetches products with a specific name and returns their category
-// async function prodCategory() {           //called 4 times before fetching
-//     console.log("prodCategory called");
-
-// const ul = document.getElementById('results'); 
-
-// ul.textContent = '';
-
-// const userInput = document.getElementById('productName').value.toLowerCase();
-//     console.log('userInput: ' + userInput);
-//     console.log('encoded uri userinput: ' + encodeURI(userInput.toLowerCase()));
 
 
-// return await fetch('../api/v1/products?name=' + encodeURI(userInput.toLowerCase()))
-// .then((resp) => resp.json()) // Transform the data into json
-// .then(function(data) { // Here you get the data to modify as you please
-// return data.map(prod => prod.category);
- 
-// })
-// }
 
-
-// const shopCount = computed(() => {
-//   return shops.value.length;
-// });
 
 //capitalizes first letter of a string
 function capitalizeFirstLetter(string) {

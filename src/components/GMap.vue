@@ -58,6 +58,7 @@
       
     });
 
+  //clears map from markers
   function clearMarkers(){
    
     console.log('WAYPOINTS IN CLEAR: ' + waypoints.value.length);
@@ -78,9 +79,7 @@
 }
 
 
-
-
-
+//gets user position
 async function geolocate() {
   return new Promise((resolve, reject) => {
     navigator.geolocation.getCurrentPosition(
@@ -129,128 +128,20 @@ async function geolocate() {
   });
 }
 
-
-// async function geolocate() {
-  
-//   navigator.geolocation.getCurrentPosition(position => {
-//     console.log('in geolocate');
-//     console.log('position.coords.latitude: ' +position.coords.latitude);
-//     console.log('position.coords.longitude: ' +position.coords.longitude);
-
-//     center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
-//     console.log('GEOLOCATE new center: '+ center.value.lat +' ,' + center.value.lng);
-
-
-//   myMarker.value.push({position: center.value});
-//    // center.value = {lat: position.coords.latitude, lng: position.coords.longitude}
-//   //reinitializeMap();
-//     //this.center.setMap(this.center);
-//     // this.center.lat = position.coords.latitude;
-//     // this.center.lng = position.coords.longitude 
-//   });
-
-// }
+//reinitializes map with a new center
 function reinitializeMap() {
           console.log('reinitializeMap');
           clearMarkers();
       mapRef.value.$mapPromise.then((map) => {
         mapRef.value.map = map;
         map.setCenter(center.value);
-          //this.map = map;
-          //console.log('map initialized: ', map);
 
-    //     markers.value.push({
-    //       //position: center.value
-    //     });
-    //  // markers.value.forEach((marker)=>addMarker(marker.position))
-
-    //     myMarker.value.push({
-    //       //position: center.value
-    //     })
-        // Initialize or update markers
-        // this.updateMapMarkers();
       }).catch((error) => {
           console.error('Error initializing map:', error);
         });
       }
-    
-//const myMap = mapRef.value.map;
-  
-// function addMarker(currentPosition){
-//   markers.value.push(
-//   new google.maps.Marker({
-//     position: currentPosition,
-//     myMap,
-//     title: "Hello World!",
-//   }))
 
-// }
-
-  //  async function getRoute() {
-
-  //     await geolocate();
-  //     console.log('GET ROUTE: start' + center.value.lat + ' ,' + center.value.lng )
-  //     // POST request using fetch with error handling
-  //     const requestOptions = {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json', 
-  //                  'X-Goog-Api-Key': import.meta.env.VITE_API_KEY,  
-  //                  'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'},
-  //       body: JSON.stringify(
-  //         {
-  //             "origin":{
-  //               "location":{
-  //                 "latLng":{
-  //                   "latitude": center.value.lat,
-  //                   "longitude": center.value.lng
-  //                 }
-  //               }
-  //             },
-  //             "destination":{
-  //               "location":{
-  //                 "latLng":{
-  //                   "latitude": 46.0663851,
-  //                   "longitude": 11.1544449 //coop povo
-  //                 }
-  //               }
-  //             },
-  //             "travelMode": "DRIVE",
-  //             "routingPreference": "TRAFFIC_AWARE",
-  //             "departureTime":  new Date().toISOString(),
-  //             "computeAlternativeRoutes": false,
-  //             // "routeModifiers": {
-  //             //   "avoidTolls": false,
-  //             //   "avoidHighways": false,
-  //             //   "avoidFerries": false
-  //             // },
-  //            // "languageCode": "en-US",
-  //             //"units": "IMPERIAL"
-  //           })
-  //     };
-  //     fetch('https://routes.googleapis.com/directions/v2:computeRoutes', requestOptions)
-  //       .then(async response => {
-  //         const data = await response.json();
-    
-  //         // check for error response
-  //         if (!response.ok) {
-  //           // get error message from body or default to response status
-  //           const error = (data && data.message) || response.status;
-  //           return Promise.reject(error);
-  //         }
-  
-  //         if (data.routes && data.routes[0] && data.routes[0].polyline) {
-  //           //this.drawPolyline(data.routes[0].polyline.encodedPolyline);
-  //            drawPolyline(data.routes[0].polyline.encodedPolyline);
-  //         }
-    
-  //         console.log('RESPONSE: ' + data.value);
-  //         console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
-  //       })
-  //       .catch(error => {
-  //         console.error('There was an error!', error);
-  //       });
-  //   }
-
+    //draws path line on map
     function drawPolyline(encodedPolyline, data) {
       console.log('drawpolyline called');
     //console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
@@ -271,6 +162,7 @@ function reinitializeMap() {
       polyline.setMap(mapRef.value.map);
     }
 
+    //gets CEST time from ISO
   function getCESTISOString() {
       let currentDate = new Date();
   
@@ -288,7 +180,7 @@ function reinitializeMap() {
 }
 
 
-
+  //POST request to get route
   async function getRoute() {
   try {
     await geolocate();
@@ -389,6 +281,7 @@ function durationToNumber(str) {
       
   //   })
   // }
+  //gets coordinates of waypoints
   function getWaypointsCoord() {
   return waypoints.value.map((point) => {
     const coords = point.split(' / ')[2].split(',');
@@ -403,6 +296,7 @@ function durationToNumber(str) {
   });
 }
 
+//gets coordinates of destination
 function getDestination() {
   const lastWaypoint = waypoints.value[waypoints.value.length - 1];
   const coords = lastWaypoint.split(' / ')[2].split(',');
@@ -416,6 +310,7 @@ function getDestination() {
   };
 }
 
+//POST request for route with waypoints
 async function getMultipointRoute() {
   try {
     await geolocate();
@@ -461,22 +356,7 @@ async function getMultipointRoute() {
       return Promise.reject(error);
     }
 
-    // if (data.routes && data.routes[0] && data.routes[0].polyline) {
-    //   drawPolyline(data.routes[0].polyline.encodedPolyline);
-    // }
-    // if (data.routes && data.routes[0] && data.routes[0].legs) {
-    //   console.log('ROUTE:', data.routes[0].legs.length);
-    //   console.log('ROUTE:', data.routes[0].legs);
-    //   for(let i=0;i<data.routes[0].legs.length;i++){
-    //     drawPolyline(data.routes[0].legs[i].polyline.encodedPolyline)
-    //   }
-    //   // data.routes[0].legs.forEach(
-    //   //   drawPolyline(data.routes[0].polyline.encodedPolyline)
-    //   // )
-    //   // if (data.routes[0].polyline) {
-    //   //   drawPolyline(data.routes[0].polyline.encodedPolyline);
-    //   // }
-    // }
+   
     
     if (data.routes && data.routes[0] && data.routes[0].legs) {
       console.log('ROUTE:', data.routes[0].legs.length);
@@ -497,198 +377,6 @@ async function getMultipointRoute() {
     console.error('There was an error!', error);
   }
 }
-
-      
-// const drawPolyline = (encodedPolyline) => {
-//   console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
-//   const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
-//   // if (polyline) {
-//   //   mapRef.value.polyline.setMap(null);
-//   // }
-//   polyline = new google.maps.Polyline({
-//     path: path,
-//     geodesic: true,
-//     strokeColor: '#FF0000',
-//     strokeOpacity: 1.0,
-//     strokeWeight: 2
-//   });
-//   polyline.setMap(mapRef.value);
-// };
-
-    // data() {
-    //   return {
-    //     infoWindowIndex: null
-    //   };
-    // },
-    // setup(){
-    //   geolocate;
-    // },
-//     watch: {
-//       center:{
-//         handler(){
-//           this.reinitializeMap();
-//         }
-//       },
-//       markers: {
-//         handler() {
-//           this.updateMapMarkers();
-//         },
-//         deep: true
-//       }
-//     },
-//     methods: {
-//       getRoute() {
-//       // POST request using fetch with error handling
-//       const requestOptions = {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json', 
-//                    'X-Goog-Api-Key': import.meta.env.VITE_API_KEY,  
-//                    'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline'},
-//         body: JSON.stringify(
-//           {
-//               "origin":{
-//                 "location":{
-//                   "latLng":{
-//                     "latitude": 46.067546,
-//                     "longitude": 11.121488
-//                   }
-//                 }
-//               },
-//               "destination":{
-//                 "location":{
-//                   "latLng":{
-//                     "latitude": 46.0663851,
-//                     "longitude": 11.1544449
-//                   }
-//                 }
-//               },
-//               "travelMode": "DRIVE",
-//               "routingPreference": "TRAFFIC_AWARE",
-//               "departureTime": "2024-05-29T18:41:23.045123456Z",
-//               "computeAlternativeRoutes": false,
-//               // "routeModifiers": {
-//               //   "avoidTolls": false,
-//               //   "avoidHighways": false,
-//               //   "avoidFerries": false
-//               // },
-//              // "languageCode": "en-US",
-//               //"units": "IMPERIAL"
-//             })
-//       };
-//       fetch('https://routes.googleapis.com/directions/v2:computeRoutes', requestOptions)
-//         .then(async response => {
-//           const data = await response.json();
-    
-//           // check for error response
-//           if (!response.ok) {
-//             // get error message from body or default to response status
-//             const error = (data && data.message) || response.status;
-//             return Promise.reject(error);
-//           }
-  
-//           if (data.routes && data.routes[0] && data.routes[0].polyline) {
-//             this.drawPolyline(data.routes[0].polyline.encodedPolyline);
-//           }
-    
-//           console.log('RESPONSE: ' + data.value);
-//           console.log('Formatted RESPONSE:', JSON.stringify(data, null, 2));
-//         })
-//         .catch(error => {
-//           console.error('There was an error!', error);
-//         });
-//     },
-  
-//     drawPolyline(encodedPolyline) {
-//       console.log('GOOGLE.MAPS: '+ JSON.stringify(google.maps,null,2));
-//         const path = google.maps.geometry.encoding.decodePath(encodedPolyline);
-//         if (this.polyline) {
-//           this.polyline.setMap(null);
-//         }
-//         this.polyline = new google.maps.Polyline({
-//           path: path,
-//           geodesic: true,
-//           strokeColor: '#FF0000',
-//           strokeOpacity: 1.0,
-//           strokeWeight: 2
-//         });
-//         this.polyline.setMap(this.map);
-//       },
-//       reinitializeMap() {
-//         console.log('reinitializeMap');
-//         this.$refs.mapRef.$mapPromise.then((map) => {
-//           this.map = map;
-//           console.log('map initialized: ', map);
-  
-//           // Initialize or update markers
-//          // this.updateMapMarkers();
-//         }).catch((error) => {
-//           console.error('Error initializing map:', error);
-//         });
-//       },
-//       openInfoWindow(index) {
-//         this.infoWindowIndex = index;
-//       },
-//       updateMapMarkers() {
-//         console.log('updateMapMarkers');
-//         if (this.map) {
-//           // Clear existing markers
-//           this.clearMarkers();
-  
-//           // Add new markers to the map
-//           this.markers.forEach((marker, index) => {
-//             const newMarker = new google.maps.Marker({
-//               position: marker.position,
-//               map: this.map,
-//               clickable: true,
-//               draggable: false
-//             });
-  
-//             // Store marker reference for future use
-//             this.$refs[`marker${index}`] = newMarker;
-  
-//             newMarker.addListener('click', () => {
-//               this.openInfoWindow(index);
-//             });
-//           });
-//         }
-//       },
-//       clearMarkers() {
-//         console.log('clearMarkers');
-//         this.markers.forEach((marker, index) => {
-//           const refMarker = this.$refs[`marker${index}`];
-//           //console.log('refMarker: ' + JSON.stringify(refMarker));
-//           if (refMarker) {
-//             refMarker.setMap(null);
-//             this.$refs[`marker${index}`] = null;
-//           }
-//         });
-//       },
-//       geolocate() {
-//       navigator.geolocation.getCurrentPosition(position => {
-//       console.log('in geolocate');
-//       console.log('position.coords.latitude: ' +position.coords.latitude);
-//       console.log('position.coords.longitude: ' +position.coords.longitude);
-//       this.center = {lat: position.coords.latitude, lng: position.coords.longitude}
-//       this.center.setMap(this.center);
-//         // this.center.lat = position.coords.latitude;
-//         // this.center.lng = position.coords.longitude
-      
-//     });
-//   }
-//     //   geolocate() {
-//     //     navigator.geolocation.getCurrentPosition(position => {
-//     //       this.$refs.center = {
-//     //         lat: position.coords.latitude,
-//     //         lng: position.coords.longitude,
-//     //       };
-//     //     });
-//     // }
-//   }
-//   }
-//const geol = {geolocate}
-//defineExpose({geolocate})
-//export {geolocate}
-
 
 
 

@@ -34,17 +34,6 @@ onMounted( () => {
 
 
 
-
-
-// const toggleVisibility = (index) => {
-//   //getRoute();
-//   visible.value[index] = !visible.value[index]
-//   // startingPoint = 
-//   //console.log('this.$refs:' + this.$refs['Gmap']);
-//   //console.log('MARKERS: ' + markers.value);
-//  // mapRef.value.geolocate();
-// }
-
 const toggleVisibility= (index)  => {
 //   //getRoute();
   visible.value[index] = !visible.value[index]
@@ -53,9 +42,6 @@ const toggleVisibility= (index)  => {
 //  // mapRef.value.geolocate();
 }
 
-
-
-
 </script>
 
 
@@ -63,40 +49,7 @@ const toggleVisibility= (index)  => {
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
   </head>
-  <!-- <br/>
-  <h1>Cerca negozio per nome o per categoria:</h1>
-  <br/>
-  <input type="text" v-model="searchSC" placeholder="Cerca negozio o categoria" @keyup.enter="searchShopByName()"/>
-  <button @click="searchShopByName()">Cerca</button>
-  <br/>
-  <span style="color: red"> {{warningMessage}} </span>
-  <br/> -->
-  <!-- <button @click="control()">control</button> -->
-    <!-- <BListGroup >
-     <BListGroupItem v-for="(shop, index) in shops.value" :key="shop.self" v-if="shops.value.length !== undefined " >
-        <li >
-          <a :href="HOST+shop.self">{{shop.name}}</a> - {{ shop.address }}
-         
-          <BButton
-            :class="visible[index] ? null : 'collapsed'"
-            :aria-expanded="visible[index] ? 'true' : 'false'"
-            aria-controls="collapse-4"
-            @click="toggleVisibility(index)">
-              Informazioni
-          </BButton>
-        
-          <BCollapse id="collapse-4" v-model="visible[index]" class="mt-2">
-              <ViewInformation v-if="shop" :shop="shop" />
-          </BCollapse>
-        </li>
-     </BListGroupItem>
-    </BListGroup>
 
-  <div>
-    <GMap  />
-  
-  </div>
-     -->
 
   <div class="containerwhite" style="padding-bottom: 4em;">
     <div class="left-column">
@@ -151,35 +104,6 @@ const toggleVisibility= (index)  => {
 
 <style>
 
-/* Assuming you have a navbar */
-/* .navbar {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background-color: #f8f9fa; 
-  z-index: 1000;
-  padding: 10px 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-} */
-
-/* Container for the search and map section */
-/* .container {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 70px; 
-  padding: 20px;
-}
-
-.left-column {
-  width: 45%;
-  padding: 2%;
-}
-
-.right-column {
-  width: 45%;
-  padding: 2%;
-} */
-  /* 
 
 /* Search section */
 .search-section {
