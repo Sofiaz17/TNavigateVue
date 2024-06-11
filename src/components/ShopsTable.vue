@@ -96,7 +96,7 @@ async function toggleCategories() {
 </template> 
 
 <style scoped>
-@import './src/assets/style.css';
+@import '/src/assets/style.css';
 
 /* Styling the list group */
 .b-list-group {
