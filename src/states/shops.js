@@ -3,6 +3,7 @@ import { warningMessage } from './searchFunctions'
 import { seeShops } from './mapsFunctions'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
+//const HOST = `http://localhost:3000`
 const API_URL = HOST+`/api/v1`
 const SHOPS_URL = API_URL+'/shops'
 const CATEG_URL = API_URL+'/shopCategories'

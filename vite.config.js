@@ -20,9 +20,9 @@ export default defineConfig({
       "fast-deep-equal",
     ],
   },
-// base: process.env.BASE_PATH || '/'
-  base: process.env.NODE_ENV === 'production'
-          ? '/TNavigateApp/' // prod
-          : '/', // dev
+  base: process.env.BASE_PATH || '/'
+  // base: process.env.NODE_ENV === 'production'
+  //         ? '/TNavigateApp/' // prod
+  //         : '/', // dev
 })
 
