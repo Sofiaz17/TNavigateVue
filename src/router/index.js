@@ -3,7 +3,7 @@ import ShopsView from '../views/ShopsView.vue'
 import HomeView from '../views/HomeView.vue'
 import IndexView from '../views/IndexView.vue'
 import ProductsView from '../views/ProductsView.vue'
-import LoginView from '@/views/LoginView.vue'
+import LoginView from '../views/LoginView.vue'
 
 
 const router = createRouter({
