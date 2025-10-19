@@ -5,7 +5,7 @@ import IndexView from '../views/IndexView.vue'
 import ProductsView from '../views/ProductsView.vue'
 import LoginView from '../views/LoginView.vue'
 import SignUpView from '../views/SignUpView.vue'
-
+import ProfileView from '../views/ProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,11 +30,6 @@ const router = createRouter({
       name: 'products',
       component: ProductsView
     },
-    // {
-    //   path: '/shops',
-    //   name: 'shops',
-    //   component: ShopsView
-    // },
     {
       path: '/login',
       name: 'login',
@@ -44,34 +39,29 @@ const router = createRouter({
       path: '/signup',
       name: 'signup',
       component: SignUpView
+    },
+    {
+      path: '/profile',
+      name: 'profile',
+      component: ProfileView,
+      meta: { requiresAuth: true }
     }
-    // {
-    //   path: '/signin',
-    //   name: 'signin',
-    //   component: SignInView
-    // }
-    // {
-    //   path: '/products',
-    //   name: 'products',
-    //   component: ProductsView
-    // },
-    // {
-    //   path: '/login',
-    //   name: 'login',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (About.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import('../views/LoginView.vue')
-    // },
-    // {
-    //   path: '/signup',
-    //   name: 'signup',
-    //   // route level code-splitting
-    //   // this generates a separate chunk (About.[hash].js) for this route
-    //   // which is lazy-loaded when the route is visited.
-    //   component: () => import('../views/SignupView.vue')
-    // }
   ]
+})
+
+// Navigation guard to protect profile route
+router.beforeEach((to, from, next) => {
+  if (to.meta.requiresAuth) {
+    // Check if user is logged in (you might want to import loggedUser here)
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+    if (!token) {
+      next('/login')
+    } else {
+      next()
+    }
+  } else {
+    next()
+  }
 })
 
 export default router

@@ -24,6 +24,12 @@ function setLoggedUser (data) {
     loggedUser.surname = data.surname;
     loggedUser.phone = data.phone;
     loggedUser.address = data.address;
+    
+    // Persist token in localStorage for router guard
+    if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userId', data.id);
+    }
 }
 
 function clearLoggedUser () {
@@ -36,6 +42,26 @@ function clearLoggedUser () {
     loggedUser.surname = undefined;
     loggedUser.phone = undefined;
     loggedUser.address = undefined;
+    
+    // Clear localStorage
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
 }
+
+// Initialize from localStorage on app start
+function initializeFromStorage() {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    
+    if (token && userId) {
+        // You might want to validate the token with the backend here
+        // For now, we'll just set the token
+        loggedUser.token = token;
+        loggedUser.id = userId;
+    }
+}
+
+// Call initialization
+initializeFromStorage();
 
 export { loggedUser, setLoggedUser, clearLoggedUser } 

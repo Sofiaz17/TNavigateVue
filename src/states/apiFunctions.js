@@ -1,6 +1,6 @@
 // API functions for user registration and authentication
 
-const HOST = import.meta.env.VITE_API_HOST || `http://localhost:8080`
+const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 const API_URL = HOST + `/api/v1`
 
 /**
@@ -15,8 +15,11 @@ const API_URL = HOST + `/api/v1`
  * @param {string} userData.address - User's address (optional)
  * @returns {Promise<Object>} Registration response
  */
+// In apiFunctions.js, modify the registerUser function:
 export async function registerUser(userData) {
   try {
+    console.log('Sending registration data:', userData) // Add this line
+    
     const response = await fetch(`${API_URL}/users/register`, {
       method: 'POST',
       headers: {
@@ -26,6 +29,7 @@ export async function registerUser(userData) {
     })
 
     const data = await response.json()
+    console.log('Backend response:', data) // Add this line
 
     if (!response.ok) {
       throw new Error(data.message || 'Registration failed')
@@ -123,6 +127,34 @@ export async function updateUserProfile(token, userId, updateData) {
     return data
   } catch (error) {
     console.error('Update user profile error:', error)
+    throw error
+  }
+}
+
+/**
+ * Delete user account
+ * @param {string} token - User's authentication token
+ * @param {string} userId - User's ID
+ * @returns {Promise<Object>} Delete response
+ */
+export async function deleteUserAccount(token, userId) {
+  try {
+    const response = await fetch(`${API_URL}/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      const data = await response.json()
+      throw new Error(data.message || 'Failed to delete account')
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error('Delete account error:', error)
     throw error
   }
 }
