@@ -1,10 +1,45 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { loggedUser } from './states/loggedUser.js'
 //import HelloWorld from '@/components/HelloWorld.vue'
 //import Login from '@/components/Login.vue'
 
 //import { ref, onMounted } from 'vue'
 
+// Create a reactive reference to track localStorage changes
+const localStorageToken = ref(localStorage.getItem('token'))
+
+// Function to update the reactive reference
+function updateLocalStorageToken() {
+  localStorageToken.value = localStorage.getItem('token')
+}
+
+// Listen for storage events (when localStorage changes in other tabs)
+function handleStorageChange(event) {
+  if (event.key === 'token') {
+    updateLocalStorageToken()
+  }
+}
+
+// Computed property that reacts to both reactive state and localStorage
+const isLoggedIn = computed(() => {
+  return !!loggedUser.token || !!localStorageToken.value
+})
+
+// Set up event listeners
+onMounted(() => {
+  // Listen for storage changes from other tabs
+  window.addEventListener('storage', handleStorageChange)
+  
+  // Also listen for custom events (for same-tab changes)
+  window.addEventListener('localStorageChanged', updateLocalStorageToken)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorageChange)
+  window.removeEventListener('localStorageChanged', updateLocalStorageToken)
+})
 </script>
 
 
@@ -31,9 +66,20 @@ import { RouterLink, RouterView } from 'vue-router'
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/shops">Negozi</RouterLink>
         <RouterLink to="/products">Lista della spesa</RouterLink>
-        <RouterLink to="/login">Login</RouterLink>
-        <RouterLink to="/signup">Registrati</RouterLink>
-        <RouterLink to="/index">Indice negozi</RouterLink>
+        
+        <!-- Show different navigation based on login status -->
+        <template v-if="isLoggedIn">
+          <!-- Logged in user navigation -->
+          <RouterLink to="/index">Indice negozi</RouterLink>
+          <RouterLink to="/profile">Profilo</RouterLink>
+        </template>
+        
+        <template v-else>
+          <!-- Not logged in navigation -->
+          <RouterLink to="/login">Login</RouterLink>
+          <RouterLink to="/signup">Registrati</RouterLink>
+          <RouterLink to="/index">Indice negozi</RouterLink>
+        </template>
       </nav>
     </div>
   </header>
@@ -145,4 +191,36 @@ nav a:first-of-type {
     margin-top: 1rem;
   }
 } */
+
+/* Additional styles for the user welcome message */
+.user-welcome {
+  color: #007bff;
+  font-weight: 500;
+  padding: 0 1rem;
+  border-left: 1px solid var(--color-border);
+  font-size: 0.9rem;
+}
+
+/* Ensure proper spacing for navigation items */
+nav a {
+  display: inline-block;
+  padding: 0 1rem;
+  border-left: 1px solid var(--color-border);
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
+}
+
+nav a:hover {
+  color: #007bff;
+}
+
+nav a:first-of-type {
+  border: 0;
+}
+
+nav a.router-link-exact-active {
+  color: #007bff;
+  font-weight: 600;
+}
 </style>

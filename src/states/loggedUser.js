@@ -29,6 +29,9 @@ function setLoggedUser (data) {
     if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.id);
+        
+        // Dispatch custom event to notify App.vue of localStorage change
+        window.dispatchEvent(new CustomEvent('localStorageChanged'));
     }
 }
 
@@ -46,6 +49,9 @@ function clearLoggedUser () {
     // Clear localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
+    
+    // Dispatch custom event to notify App.vue of localStorage change
+    window.dispatchEvent(new CustomEvent('localStorageChanged'));
 }
 
 // Initialize from localStorage on app start

@@ -176,6 +176,12 @@ async function deleteAccount() {
   }
 }
 
+// Logout function
+function logout() {
+  clearLoggedUser()
+  router.push('/')
+}
+
 // Cancel editing
 function cancelEdit() {
   isEditing.value = false
@@ -203,13 +209,21 @@ onMounted(() => {
   <div class="profile-container">
     <div class="profile-header">
       <h1>Il Mio Profilo</h1>
-      <button 
-        v-if="!isEditing" 
-        @click="isEditing = true" 
-        class="edit-btn"
-      >
-        Modifica Profilo
-      </button>
+      <div class="header-actions">
+        <button 
+          v-if="!isEditing" 
+          @click="isEditing = true" 
+          class="edit-btn"
+        >
+          Modifica Profilo
+        </button>
+        <button 
+          @click="logout"
+          class="logout-btn"
+        >
+          Logout
+        </button>
+      </div>
     </div>
 
     <div v-if="isLoading" class="loading">
@@ -413,6 +427,12 @@ onMounted(() => {
   margin: 0;
 }
 
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
 .edit-btn {
   background-color: #007bff;
   color: white;
@@ -426,6 +446,21 @@ onMounted(() => {
 
 .edit-btn:hover {
   background-color: #0056b3;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
 }
 
 .loading {
@@ -658,6 +693,10 @@ input.error {
     flex-direction: column;
     gap: 1rem;
     align-items: stretch;
+  }
+  
+  .header-actions {
+    justify-content: center;
   }
 }
 </style>
