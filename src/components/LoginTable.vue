@@ -1,15 +1,17 @@
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { loggedUser, setLoggedUser, clearLoggedUser } from '../states/loggedUser.js'
 import { authenticateUser } from '../states/apiFunctions.js'
 
 const router = useRouter()
+const route = useRoute()
 
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const isLoading = ref(false)
+const infoMessage = ref('')
 
 const emit = defineEmits(['login'])
 
@@ -54,6 +56,15 @@ function logout() {
   clearLoggedUser()
   router.push('/login')
 }
+
+// Check for query message on mount
+onMounted(() => {
+  if (route.query.message) {
+    infoMessage.value = route.query.message
+    // Clear the query parameter from URL
+    router.replace({ path: '/login' })
+  }
+})
 </script>
 
 <template>
@@ -69,6 +80,10 @@ function logout() {
     
     <form v-else @submit.prevent="login" class="login-form-content">
       <h3>Accedi al tuo account</h3>
+      
+      <div v-if="infoMessage" class="info-message">
+        {{ infoMessage }}
+      </div>
       
       <div class="form-group">
         <label for="email">Email</label>
@@ -169,6 +184,16 @@ input[type="password"]:focus {
   padding: 0.5rem;
   background: #f8d7da;
   border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
+.info-message {
+  color: #0c5460;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
   border-radius: 4px;
 }
 

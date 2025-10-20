@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { loggedUser, setLoggedUser, clearLoggedUser } from '../states/loggedUser.js'
 import { getCurrentUser, updateProfile, deleteAccount as apiDeleteAccount, validateEmail, validatePassword, createShop, getMyShops, updateShop as apiUpdateShop, deleteShop as apiDeleteShop } from '../states/apiFunctions.js'
 import { categories, fetchCategories } from '../states/shops.js'
+import { favorites, loadFavorites, removeFromFavorites, isFavorite } from '../states/favorites.js'
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 const router = useRouter()
@@ -431,11 +432,25 @@ function cancelEdit() {
   editData.confirmPassword = ''
 }
 
+// Remove from favorites function
+function removeFromFavoritesList(shop) {
+  try {
+    removeFromFavorites(shop)
+  } catch (error) {
+    console.error('Error removing from favorites:', error)
+  }
+}
+
 onMounted(() => {
   loadProfile()
   // After profile loaded, these may run; also run optimistically
   loadCategories()
   setTimeout(loadOwnedShops, 300)
+  
+  // Load favorites for the logged in user
+  if (loggedUser.token) {
+    loadFavorites()
+  }
 })
 </script>
 
@@ -499,6 +514,38 @@ onMounted(() => {
           <div class="info-item">
             <label>Tipo Utente:</label>
             <span>{{ loggedUser.userType === 'base_user' ? 'Utente Base' : 'Proprietario Negozio' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Favorites Section -->
+      <div class="favorites-section">
+        <h3>I miei negozi preferiti</h3>
+        <div v-if="favorites.length === 0" class="no-favorites-message">
+          <p>Non hai ancora aggiunto nessun negozio ai preferiti.</p>
+          <p>Visita la sezione <router-link to="/shops">Indice negozi</router-link> per iniziare a esplorare!</p>
+        </div>
+        
+        <div v-else class="favorites-list">
+          <div class="favorite-card" v-for="shop in favorites" :key="shop.self || shop._id || shop.id">
+            <div class="favorite-header">
+              <h4>{{ shop.name }}</h4>
+              <button 
+                @click="removeFromFavoritesList(shop)" 
+                class="remove-favorite-btn"
+                title="Rimuovi dai preferiti"
+              >
+                ⭐
+              </button>
+            </div>
+            <div class="favorite-body">
+              <div><strong>Categoria:</strong> {{ shop.category }}</div>
+              <div><strong>Indirizzo:</strong> {{ shop.address }} {{ shop.civico }}, {{ shop.cap }} {{ shop.city }} ({{ shop.provincia }})</div>
+              <div v-if="shop.information"><strong>Info:</strong> {{ shop.information }}</div>
+              <div class="favorite-actions">
+                <a :href="HOST+shop.self" target="_blank" class="view-details-btn">Visualizza dettagli</a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1122,5 +1169,172 @@ input.error {
 .no-shops-message p {
   margin: 0;
   font-size: 1.1rem;
+}
+
+/* Button consistency styles */
+
+/* Style for "Aggiungi il tuo shop" and "Chiudi" buttons to match "Modifica Profilo" */
+.add-shop-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.add-shop-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Style for "Modifica" button to match "Modifica Profilo" */
+.small {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+.small:hover {
+  background-color: #0056b3;
+}
+
+/* Style for "Elimina" button to match "Logout" and "Elimina Account" */
+.small.danger {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.small.danger:hover {
+  background-color: #c82333;
+}
+
+/* Favorites section styles */
+.favorites-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.favorites-section h3 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.no-favorites-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+.no-favorites-message p {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.no-favorites-message a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.no-favorites-message a:hover {
+  text-decoration: underline;
+}
+
+.favorites-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.favorite-card {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  transition: box-shadow 0.2s ease;
+}
+
+.favorite-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.favorite-header h4 {
+  color: #333;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.remove-favorite-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  color: #ffd700;
+  text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+}
+
+.remove-favorite-btn:hover {
+  transform: scale(1.1);
+  background-color: rgba(255, 215, 0, 0.1);
+}
+
+.favorite-body {
+  color: #555;
+}
+
+.favorite-body > div {
+  margin-bottom: 0.5rem;
+}
+
+.favorite-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.view-details-btn {
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+  display: inline-block;
+}
+
+.view-details-btn:hover {
+  background-color: #0056b3;
+  text-decoration: none;
+  color: white;
 }
 </style>

@@ -5,11 +5,13 @@ import { shops, categories, fetchShops, fetchShopsName, fetchCategories, fetchSh
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
 import { seeShops, markers, setEndingPoint, clearWaypoints, clearEndingPoint/*, clearMarkers */} from '@/states/mapsFunctions.js'
+import { loggedUser } from '../states/loggedUser.js'
+import { addToFavorites, removeFromFavorites, isFavorite, loadFavorites } from '../states/favorites.js'
+import { useRouter } from 'vue-router'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
-
-
+const router = useRouter()
 const visible1 = ref([false])
 const visible = ref(false)
 
@@ -22,6 +24,11 @@ onMounted( () => {
   clearEndingPoint();
   clearWaypoints();
  // clearMarkers();  //not working
+  
+  // Load favorites for logged in user
+  if (loggedUser.token) {
+    loadFavorites();
+  }
 })
 
 const toggleVisibility = (index) => {
@@ -33,6 +40,28 @@ async function toggleCategories() {
     await loadCategories();
   }
   visible.value = !visible.value;
+}
+
+// Favorites functions
+function toggleFavorite(shop) {
+  if (!loggedUser.token || !loggedUser.id) {
+    // User not logged in, redirect to login with message
+    router.push({
+      path: '/login',
+      query: { message: 'Devi effettuare il login per aggiungere negozi ai preferiti' }
+    })
+    return
+  }
+  
+  try {
+    if (isFavorite(shop)) {
+      removeFromFavorites(shop)
+    } else {
+      addToFavorites(shop)
+    }
+  } catch (error) {
+    console.error('Error toggling favorite:', error)
+  }
 }
 
 </script>
@@ -64,7 +93,18 @@ async function toggleCategories() {
         <div @click="searchShopfromCat(categ.name)">{{ categ.name }}</div>
         <ul v-for="(shop, index) in shops.value" :key="shop.self">
           <li v-if="shops.value[0].category == categ.name">
-            <a :href="HOST+shop.self">{{shop.name}}</a> - {{ shop.address }} <br>
+            <div class="shop-name-row">
+              <a :href="HOST+shop.self">{{shop.name}}</a>
+              <button 
+                @click="toggleFavorite(shop)" 
+                class="favorite-btn"
+                :class="{ 'favorited': isFavorite(shop) }"
+                :title="isFavorite(shop) ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'"
+              >
+                ⭐
+              </button>
+            </div>
+            {{ shop.address }} <br>
             <BButton
               :class="visible1[index] ? null : 'collapsed'"
               :aria-expanded="visible1[index] ? 'true' : 'false'"
@@ -164,5 +204,48 @@ async function toggleCategories() {
 
 .category-item:hover {
   background-color: #f0f0f0;
+}
+
+/* Shop name row styling */
+.shop-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+
+.shop-name-row a {
+  flex: 1;
+}
+
+/* Favorite button styling */
+.favorite-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.favorite-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.favorite-btn.favorited {
+  opacity: 1;
+  color: #ffd700;
+  text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+}
+
+.favorite-btn:not(.favorited) {
+  color: #ccc;
+}
+
+.favorite-btn:not(.favorited):hover {
+  color: #ffd700;
 }
 </style>

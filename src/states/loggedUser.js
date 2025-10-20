@@ -14,7 +14,7 @@ const loggedUser = reactive({
     address: undefined
 })
 
-function setLoggedUser (data) {
+async function setLoggedUser (data) {
     loggedUser.token = data.token;
     loggedUser.email = data.email;
     loggedUser.id = data.id;
@@ -38,10 +38,18 @@ function setLoggedUser (data) {
         
         // Dispatch custom event to notify App.vue of localStorage change
         window.dispatchEvent(new CustomEvent('localStorageChanged'));
+        
+        // Load favorites for the logged in user
+        try {
+            const { loadFavorites } = await import('./favorites.js');
+            loadFavorites();
+        } catch (error) {
+            console.error('Error loading favorites on login:', error);
+        }
     }
 }
 
-function clearLoggedUser () {
+async function clearLoggedUser () {
     loggedUser.token = undefined;
     loggedUser.email = undefined;
     loggedUser.id = undefined;
@@ -61,6 +69,14 @@ function clearLoggedUser () {
     localStorage.removeItem('userSurname');
     localStorage.removeItem('userPhone');
     localStorage.removeItem('userAddress');
+    
+    // Clear favorites when user logs out
+    try {
+        const { clearFavorites } = await import('./favorites.js');
+        clearFavorites();
+    } catch (error) {
+        console.error('Error clearing favorites on logout:', error);
+    }
     
     // Dispatch custom event to notify App.vue of localStorage change
     window.dispatchEvent(new CustomEvent('localStorageChanged'));
