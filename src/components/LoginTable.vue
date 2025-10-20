@@ -25,22 +25,20 @@ async function login() {
   try {
     const data = await authenticateUser(email.value, password.value)
     
-    // Set user data
+    // Set user data with all fields from backend response
     setLoggedUser(data)
-    // Persist explicitly for clarity (apiFunctions may not persist)
-    if (data?.token && data?.id) {
-      localStorage.setItem('token', data.token)
-      localStorage.setItem('userId', data.id)
-      window.dispatchEvent(new CustomEvent('localStorageChanged'))
-    }
+    
+    // Clear form
+    email.value = ''
+    password.value = ''
     
     // Check if user is base_user
     if (data.userType === 'base_user') {
       // Redirect to profile page
       router.push('/profile')
     } else {
-      // For shop_owner, redirect to home or shops page
-      router.push('/shops')
+      // For shop_owner, redirect to profile page to manage shops
+      router.push('/profile')
     }
     
     emit('login', loggedUser)

@@ -52,11 +52,12 @@ const router = createRouter({
 // Navigation guard to protect profile route
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
-    // Check if user is logged in (you might want to import loggedUser here)
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token')
+    // Check if user is logged in
+    const token = localStorage.getItem('token')
     if (!token) {
       next('/login')
     } else {
+      // Token exists, allow navigation (session validation happens in main.js)
       next()
     }
   } else {

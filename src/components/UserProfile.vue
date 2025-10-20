@@ -2,7 +2,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { loggedUser, setLoggedUser, clearLoggedUser } from '../states/loggedUser.js'
-import { getProfile, updateProfile, deleteAccount as apiDeleteAccount, validateEmail, validatePassword } from '../states/apiFunctions.js'
+import { getCurrentUser, updateProfile, deleteAccount as apiDeleteAccount, validateEmail, validatePassword, createShop, getMyShops, updateShop as apiUpdateShop, deleteShop as apiDeleteShop } from '../states/apiFunctions.js'
+import { categories, fetchCategories } from '../states/shops.js'
+const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 const router = useRouter()
 
@@ -10,6 +12,51 @@ const isEditing = ref(false)
 const isLoading = ref(false)
 const error = ref('')
 const success = ref('')
+
+// Shop owner state
+const isShopOwner = ref(false)
+const myShops = ref([])
+const shopsLoading = ref(false)
+const shopsError = ref('')
+const showAddShopForm = ref(false)
+
+const categoryOptions = ref([])
+
+const openingDays = ['LUN','MAR','MER','GIO','VEN','SAB','DOM']
+
+function createEmptyOpeningHours() {
+  return openingDays.map(d => ({ day: d, state: 'closed', periods: [] }))
+}
+
+const newShop = reactive({
+  name: '',
+  owner: '',
+  address: '',
+  civico: '',
+  cap: '',
+  city: '',
+  provincia: '',
+  coordinatesLat: '',
+  coordinatesLng: '',
+  category: '',
+  information: '',
+  opening_hours: createEmptyOpeningHours(),
+})
+
+const editingShopId = ref(null)
+const editShopData = reactive({
+  name: '',
+  address: '',
+  civico: '',
+  cap: '',
+  city: '',
+  provincia: '',
+  coordinatesLat: '',
+  coordinatesLng: '',
+  category: '',
+  information: '',
+  opening_hours: createEmptyOpeningHours(),
+})
 
 // Form data for editing
 const editData = reactive({
@@ -35,10 +82,12 @@ async function loadProfile() {
 
   try {
     isLoading.value = true
-    const profileData = await getProfile()
+    error.value = ''
+    const profileData = await getCurrentUser()
     
-    // Only update profile fields, keep token/id from storage
-    setLoggedUser({ ...loggedUser, ...profileData, token: loggedUser.token, id: loggedUser.id })
+    // Update user state with fresh data from backend
+    setLoggedUser({ ...profileData, token: loggedUser.token, id: loggedUser.id })
+    isShopOwner.value = profileData.userType === 'shop_owner'
     
     // Populate edit form
     editData.name = profileData.name || ''
@@ -48,7 +97,7 @@ async function loadProfile() {
     editData.address = profileData.address || ''
   } catch (err) {
     console.error('Error loading profile:', err)
-    if (err.message === 'Unauthorized') {
+    if (err.message === 'Unauthorized' || err.message.includes('Unauthorized')) {
       clearLoggedUser()
       router.push('/login')
       return
@@ -56,6 +105,184 @@ async function loadProfile() {
     error.value = err.message || 'Errore nel caricamento del profilo'
   } finally {
     isLoading.value = false
+  }
+}
+
+async function loadCategories() {
+  try {
+    await fetchCategories()
+    categoryOptions.value = Array.isArray(categories.value) ? categories.value.map(c => c.name) : []
+  } catch (e) {
+    console.error('Error loading categories', e)
+  }
+}
+
+async function loadOwnedShops() {
+  if (!isShopOwner.value) return
+  try {
+    shopsLoading.value = true
+    shopsError.value = ''
+    const list = await getMyShops()
+    myShops.value = Array.isArray(list) ? list : []
+  } catch (e) {
+    console.error('Error loading shops', e)
+    shopsError.value = e.message || 'Errore nel caricamento dei negozi'
+  } finally {
+    shopsLoading.value = false
+  }
+}
+
+function resetNewShopForm() {
+  newShop.name = ''
+  newShop.owner = loggedUser.email || ''
+  newShop.address = ''
+  newShop.civico = ''
+  newShop.cap = ''
+  newShop.city = ''
+  newShop.provincia = ''
+  newShop.coordinatesLat = ''
+  newShop.coordinatesLng = ''
+  newShop.category = ''
+  newShop.information = ''
+  newShop.opening_hours = createEmptyOpeningHours()
+}
+
+function mapShopPayload(form) {
+  const coords = []
+  const lat = form.coordinatesLat !== '' ? Number(form.coordinatesLat) : null
+  const lng = form.coordinatesLng !== '' ? Number(form.coordinatesLng) : null
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    coords.push(lat, lng)
+  }
+  return {
+    name: form.name?.trim(),
+    owner: loggedUser.email,
+    address: form.address?.trim(),
+    civico: form.civico !== '' ? Number(form.civico) : undefined,
+    cap: form.cap !== '' ? Number(form.cap) : undefined,
+    city: form.city?.trim(),
+    provincia: form.provincia?.trim(),
+    coordinates: coords,
+    category: form.category || undefined,
+    information: form.information?.trim(),
+    opening_hours: form.opening_hours.map(d => ({
+      day: d.day,
+      state: d.state,
+      periods: (d.periods || []).map(p => ({
+        startHours: Number(p.startHours),
+        startMinutes: Number(p.startMinutes),
+        endHours: Number(p.endHours),
+        endMinutes: Number(p.endMinutes),
+      }))
+    })),
+    dataModified: true,
+  }
+}
+
+async function submitNewShop() {
+  try {
+    shopsLoading.value = true
+    shopsError.value = ''
+    success.value = ''
+    
+    const payload = mapShopPayload(newShop)
+    if (!payload.name) throw new Error('Il nome del negozio è obbligatorio')
+    if (!payload.category) throw new Error('La categoria è obbligatoria')
+    
+    const res = await createShop(payload)
+    showAddShopForm.value = false
+    resetNewShopForm()
+    
+    // Refresh the shops list to show the new shop
+    await loadOwnedShops()
+    
+    // Show success message from API response
+    success.value = res?.message || 'Negozio creato con successo'
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => {
+      success.value = ''
+    }, 3000)
+  } catch (e) {
+    console.error('Error creating shop:', e)
+    shopsError.value = e.message || 'Errore nella creazione del negozio'
+  } finally {
+    shopsLoading.value = false
+  }
+}
+
+function startEditShop(shop) {
+  editingShopId.value = shop.self || shop._links?.self?.href?.replace(HOST,'') || shop._id || shop.id || null
+  editShopData.name = shop.name || ''
+  editShopData.address = shop.address || ''
+  editShopData.civico = shop.civico ?? ''
+  editShopData.cap = shop.cap ?? ''
+  editShopData.city = shop.city || ''
+  editShopData.provincia = shop.provincia || ''
+  editShopData.coordinatesLat = Array.isArray(shop.coordinates) ? (shop.coordinates[0] ?? '') : ''
+  editShopData.coordinatesLng = Array.isArray(shop.coordinates) ? (shop.coordinates[1] ?? '') : ''
+  editShopData.category = shop.category || ''
+  editShopData.information = shop.information || ''
+  editShopData.opening_hours = (shop.opening_hours && shop.opening_hours.length)
+    ? shop.opening_hours.map(d => ({ day: d.day, state: d.state, periods: (d.periods||[]).map(p => ({...p})) }))
+    : createEmptyOpeningHours()
+}
+
+async function saveEditShop(shop) {
+  try {
+    shopsLoading.value = true
+    shopsError.value = ''
+    success.value = ''
+    
+    const payload = mapShopPayload(editShopData)
+    const self = shop.self || shop._links?.self?.href?.replace(HOST,'')
+    const res = await apiUpdateShop(self, payload)
+    
+    editingShopId.value = null
+    
+    // Refresh the shops list to show updated data
+    await loadOwnedShops()
+    
+    // Show success message from API response
+    success.value = res?.message || 'Negozio aggiornato con successo'
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => {
+      success.value = ''
+    }, 3000)
+  } catch (e) {
+    console.error('Error updating shop:', e)
+    shopsError.value = e.message || 'Errore nell\'aggiornamento del negozio'
+  } finally {
+    shopsLoading.value = false
+  }
+}
+
+async function deleteShop(shop) {
+  if (!confirm('Sei sicuro di voler eliminare questo negozio?')) return
+  try {
+    shopsLoading.value = true
+    shopsError.value = ''
+    success.value = ''
+    
+    const self = shop.self || shop._links?.self?.href?.replace(HOST,'')
+    const res = await apiDeleteShop(self)
+    
+    // Refresh the shops list to reflect the deletion
+    await loadOwnedShops()
+    
+    // Show success message from API response
+    success.value = res?.message || 'Negozio eliminato con successo'
+    
+    // Clear success message after 3 seconds
+    setTimeout(() => {
+      success.value = ''
+    }, 3000)
+  } catch (e) {
+    console.error('Error deleting shop:', e)
+    shopsError.value = e.message || 'Errore nell\'eliminazione del negozio'
+  } finally {
+    shopsLoading.value = false
   }
 }
 
@@ -206,6 +433,9 @@ function cancelEdit() {
 
 onMounted(() => {
   loadProfile()
+  // After profile loaded, these may run; also run optimistically
+  loadCategories()
+  setTimeout(loadOwnedShops, 300)
 })
 </script>
 
@@ -269,6 +499,183 @@ onMounted(() => {
           <div class="info-item">
             <label>Tipo Utente:</label>
             <span>{{ loggedUser.userType === 'base_user' ? 'Utente Base' : 'Proprietario Negozio' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="isShopOwner" class="shops-section">
+        <h3>I miei negozi</h3>
+        <div class="shop-actions">
+          <button class="add-shop-btn" @click="() => { showAddShopForm = !showAddShopForm; if (showAddShopForm) resetNewShopForm() }">
+            {{ showAddShopForm ? 'Chiudi' : 'Aggiungi il tuo shop' }}
+          </button>
+        </div>
+
+        <div v-if="shopsError" class="error-message">{{ shopsError }}</div>
+        <div v-if="shopsLoading" class="loading">Caricamento negozi...</div>
+
+        <form v-if="showAddShopForm" class="shop-form" @submit.prevent="submitNewShop">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nome *</label>
+              <input type="text" v-model="newShop.name" placeholder="Nome negozio">
+            </div>
+            <div class="form-group">
+              <label>Categoria *</label>
+              <select v-model="newShop.category">
+                <option value="" disabled>Seleziona categoria</option>
+                <option v-for="c in categoryOptions" :key="c" :value="c">{{ c }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Indirizzo</label>
+              <input type="text" v-model="newShop.address" placeholder="Via/Piazza">
+            </div>
+            <div class="form-group">
+              <label>Civico</label>
+              <input type="number" v-model="newShop.civico" min="0">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>CAP</label>
+              <input type="number" v-model="newShop.cap" min="0">
+            </div>
+            <div class="form-group">
+              <label>Città</label>
+              <input type="text" v-model="newShop.city">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Provincia</label>
+              <input type="text" v-model="newShop.provincia">
+            </div>
+            <div class="form-group">
+              <label>Coordinate (lat, lng)</label>
+              <div class="coords">
+                <input type="number" step="any" v-model="newShop.coordinatesLat" placeholder="Lat">
+                <input type="number" step="any" v-model="newShop.coordinatesLng" placeholder="Lng">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Informazioni</label>
+            <input type="text" v-model="newShop.information" placeholder="Descrizione breve">
+          </div>
+
+          <div class="opening-hours">
+            <h4>Orari di apertura</h4>
+            <div class="day-row" v-for="(d, idx) in newShop.opening_hours" :key="d.day">
+              <div class="day-label">{{ d.day }}</div>
+              <select v-model="d.state">
+                <option value="open">Aperto</option>
+                <option value="closed">Chiuso</option>
+              </select>
+              <div class="periods" v-if="d.state === 'open'">
+                <div class="period" v-for="(p, pIdx) in d.periods" :key="pIdx">
+                  <input type="number" min="0" max="23" v-model="p.startHours" placeholder="HH">
+                  <input type="number" min="0" max="59" v-model="p.startMinutes" placeholder="MM">
+                  <span>-</span>
+                  <input type="number" min="0" max="23" v-model="p.endHours" placeholder="HH">
+                  <input type="number" min="0" max="59" v-model="p.endMinutes" placeholder="MM">
+                  <button type="button" class="small danger" @click="d.periods.splice(pIdx,1)">Rimuovi</button>
+                </div>
+                <button type="button" class="small" @click="d.periods.push({ startHours: 9, startMinutes: 0, endHours: 18, endMinutes: 0 })">Aggiungi fascia</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="save-btn" :disabled="shopsLoading">{{ shopsLoading ? 'Salvataggio...' : 'Crea Negozio' }}</button>
+            <button type="button" class="cancel-btn" @click="showAddShopForm=false">Annulla</button>
+          </div>
+        </form>
+
+        <div v-if="!shopsLoading && myShops.length === 0" class="no-shops-message">
+          <p>Nessun negozio trovato. Aggiungi il tuo primo negozio!</p>
+        </div>
+
+        <div class="shops-list" v-if="myShops.length">
+          <div class="shop-card" v-for="shop in myShops" :key="shop.self || shop._id">
+            <div class="shop-header">
+              <h4>{{ shop.name }}</h4>
+              <div class="shop-actions-inline">
+                <button class="small" @click="startEditShop(shop)">Modifica</button>
+                <button class="small danger" @click="deleteShop(shop)">Elimina</button>
+              </div>
+            </div>
+            <div class="shop-body" v-if="editingShopId === (shop.self || shop._links?.self?.href?.replace(HOST,'') || shop._id)">
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Nome</label>
+                  <input type="text" v-model="editShopData.name">
+                </div>
+                <div class="form-group">
+                  <label>Categoria</label>
+                  <select v-model="editShopData.category">
+                    <option v-for="c in categoryOptions" :key="c" :value="c">{{ c }}</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Indirizzo</label><input type="text" v-model="editShopData.address"></div>
+                <div class="form-group"><label>Civico</label><input type="number" v-model="editShopData.civico"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>CAP</label><input type="number" v-model="editShopData.cap"></div>
+                <div class="form-group"><label>Città</label><input type="text" v-model="editShopData.city"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Provincia</label><input type="text" v-model="editShopData.provincia"></div>
+                <div class="form-group">
+                  <label>Coordinate (lat, lng)</label>
+                  <div class="coords">
+                    <input type="number" step="any" v-model="editShopData.coordinatesLat" placeholder="Lat">
+                    <input type="number" step="any" v-model="editShopData.coordinatesLng" placeholder="Lng">
+                  </div>
+                </div>
+              </div>
+              <div class="form-group"><label>Informazioni</label><input type="text" v-model="editShopData.information"></div>
+
+              <div class="opening-hours">
+                <h4>Orari di apertura</h4>
+                <div class="day-row" v-for="(d, idx) in editShopData.opening_hours" :key="d.day">
+                  <div class="day-label">{{ d.day }}</div>
+                  <select v-model="d.state">
+                    <option value="open">Aperto</option>
+                    <option value="closed">Chiuso</option>
+                  </select>
+                  <div class="periods" v-if="d.state === 'open'">
+                    <div class="period" v-for="(p, pIdx) in d.periods" :key="pIdx">
+                      <input type="number" min="0" max="23" v-model="p.startHours" placeholder="HH">
+                      <input type="number" min="0" max="59" v-model="p.startMinutes" placeholder="MM">
+                      <span>-</span>
+                      <input type="number" min="0" max="23" v-model="p.endHours" placeholder="HH">
+                      <input type="number" min="0" max="59" v-model="p.endMinutes" placeholder="MM">
+                      <button type="button" class="small danger" @click="d.periods.splice(pIdx,1)">Rimuovi</button>
+                    </div>
+                    <button type="button" class="small" @click="d.periods.push({ startHours: 9, startMinutes: 0, endHours: 18, endMinutes: 0 })">Aggiungi fascia</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="save-btn" type="button" @click="saveEditShop(shop)">Salva</button>
+                <button class="cancel-btn" type="button" @click="editingShopId=null">Annulla</button>
+              </div>
+            </div>
+            <div class="shop-body" v-else>
+              <div><strong>Categoria:</strong> {{ shop.category }}</div>
+              <div><strong>Indirizzo:</strong> {{ shop.address }} {{ shop.civico }}, {{ shop.cap }} {{ shop.city }} ({{ shop.provincia }})</div>
+              <div v-if="shop.information"><strong>Info:</strong> {{ shop.information }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -702,5 +1109,18 @@ input.error {
   .header-actions {
     justify-content: center;
   }
+}
+
+/* No shops message */
+.no-shops-message {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+.no-shops-message p {
+  margin: 0;
+  font-size: 1.1rem;
 }
 </style>

@@ -2,6 +2,7 @@
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 const API_URL = HOST + `/api/v1`
+const SHOPS_URL = API_URL + `/shops`
 
 /**
  * Register a new user
@@ -61,7 +62,8 @@ export async function authenticateUser(email, password) {
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.message || 'Authentication failed')
+      const errorMessage = data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`
+      throw new Error(errorMessage)
     }
 
     return data
@@ -74,42 +76,61 @@ export async function authenticateUser(email, password) {
 // Helper to handle 401 globally for profile endpoints
 function handleAuthErrors(response, data) {
   if (response.status === 401) {
-    // Clear local credentials and signal to UI
+    // Clear all user data from localStorage
     try {
       localStorage.removeItem('token')
       localStorage.removeItem('userId')
+      localStorage.removeItem('userEmail')
+      localStorage.removeItem('userType')
+      localStorage.removeItem('userName')
+      localStorage.removeItem('userSurname')
+      localStorage.removeItem('userPhone')
+      localStorage.removeItem('userAddress')
       window.dispatchEvent(new CustomEvent('localStorageChanged'))
     } catch (_) {}
-    throw new Error(data?.message || 'Unauthorized')
+    throw new Error(data?.message || 'Unauthorized - Please login again')
+  }
+  
+  // Handle other HTTP errors with actual API messages
+  if (!response.ok) {
+    const errorMessage = data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`
+    throw new Error(errorMessage)
   }
 }
 
 /**
- * Get user profile information
- * @param {string} token - User's authentication token
- * @param {string} userId - User's ID
+ * Get current user information using the new /users/me endpoint
  * @returns {Promise<Object>} User profile data
  */
-export async function getProfile() {
+export async function getCurrentUser() {
   try {
     const token = localStorage.getItem('token')
-    const userId = localStorage.getItem('userId')
-    const response = await fetch(`${API_URL}/users/${userId}`, {
+    if (!token) {
+      throw new Error('No authentication token found')
+    }
+    
+    const response = await fetch(`${API_URL}/users/me`, {
       headers: {
-        'Authorization': `Bearer ${token}`
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
       }
     })
 
     const data = await response.json()
-    if (!response.ok) {
-      handleAuthErrors(response, data)
-      throw new Error(data.message || 'Failed to fetch user profile')
-    }
+    handleAuthErrors(response, data)
     return data
   } catch (error) {
-    console.error('Get profile error:', error)
+    console.error('Get current user error:', error)
     throw error
   }
+}
+
+/**
+ * Get user profile information (legacy function for backward compatibility)
+ * @returns {Promise<Object>} User profile data
+ */
+export async function getProfile() {
+  return getCurrentUser()
 }
 
 /**
@@ -133,10 +154,7 @@ export async function updateProfile(updateData) {
     })
 
     const data = await response.json()
-    if (!response.ok) {
-      handleAuthErrors(response, data)
-      throw new Error(data.message || 'Failed to update user profile')
-    }
+    handleAuthErrors(response, data)
     return data // expected: { message, user }
   } catch (error) {
     console.error('Update profile error:', error)
@@ -162,10 +180,7 @@ export async function deleteAccount() {
     })
 
     const data = await response.json()
-    if (!response.ok) {
-      handleAuthErrors(response, data)
-      throw new Error(data.message || 'Failed to delete account')
-    }
+    handleAuthErrors(response, data)
     return data // { message: "Account deleted successfully" }
   } catch (error) {
     console.error('Delete account error:', error)
@@ -240,5 +255,125 @@ export function validateUserRegistration(userData) {
   return {
     isValid: Object.keys(errors).length === 0,
     errors
+  }
+}
+
+
+// Shop owner: shops management
+
+/**
+ * Create a new shop (shop_owner only)
+ * @param {Object} shopData - New shop data
+ * @returns {Promise<Object>} Created shop payload
+ */
+export async function createShop(shopData) {
+  try {
+    const token = localStorage.getItem('token')
+    const response = await fetch(`${SHOPS_URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(shopData)
+    })
+
+    const data = await response.json()
+    handleAuthErrors(response, data)
+    return data
+  } catch (error) {
+    console.error('Create shop error:', error)
+    throw error
+  }
+}
+
+/**
+ * Get shops owned by the current shop owner
+ * Uses owner email as filter (owner is a String in schema)
+ * @returns {Promise<Array>} Shops list
+ */
+export async function getMyShops() {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      throw new Error('No authentication token found')
+    }
+
+    // Get current user info to get the email
+    const userInfo = await getCurrentUser()
+    const ownerEmail = userInfo.email
+    
+    if (!ownerEmail) {
+      throw new Error('User email not found')
+    }
+
+    // Use proper URL encoding for the owner query
+    const query = `?owner=${encodeURIComponent(ownerEmail)}`
+    const response = await fetch(`${SHOPS_URL}${query}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const data = await response.json()
+    handleAuthErrors(response, data)
+    return Array.isArray(data) ? data : (data.items || [])
+  } catch (error) {
+    console.error('Get my shops error:', error)
+    throw error
+  }
+}
+
+/**
+ * Update a shop by its self link
+ * @param {string} shopSelf - The HAL self path of the shop (e.g., /api/v1/shops/:id)
+ * @param {Object} updateData - Partial shop data to update
+ * @returns {Promise<Object>} Updated shop
+ */
+export async function updateShop(shopSelf, updateData) {
+  try {
+    if (!shopSelf) throw new Error('shopSelf is required')
+    const token = localStorage.getItem('token')
+    const response = await fetch(`${HOST}${shopSelf}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(updateData)
+    })
+
+    const data = await response.json()
+    handleAuthErrors(response, data)
+    return data
+  } catch (error) {
+    console.error('Update shop error:', error)
+    throw error
+  }
+}
+
+/**
+ * Delete a shop by its self link
+ * @param {string} shopSelf - The HAL self path of the shop
+ * @returns {Promise<Object>} Delete response
+ */
+export async function deleteShop(shopSelf) {
+  try {
+    if (!shopSelf) throw new Error('shopSelf is required')
+    const token = localStorage.getItem('token')
+    const response = await fetch(`${HOST}${shopSelf}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    const data = await response.json()
+    handleAuthErrors(response, data)
+    return data
+  } catch (error) {
+    console.error('Delete shop error:', error)
+    throw error
   }
 }
