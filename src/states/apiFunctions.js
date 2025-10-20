@@ -71,31 +71,43 @@ export async function authenticateUser(email, password) {
   }
 }
 
+// Helper to handle 401 globally for profile endpoints
+function handleAuthErrors(response, data) {
+  if (response.status === 401) {
+    // Clear local credentials and signal to UI
+    try {
+      localStorage.removeItem('token')
+      localStorage.removeItem('userId')
+      window.dispatchEvent(new CustomEvent('localStorageChanged'))
+    } catch (_) {}
+    throw new Error(data?.message || 'Unauthorized')
+  }
+}
+
 /**
  * Get user profile information
  * @param {string} token - User's authentication token
  * @param {string} userId - User's ID
  * @returns {Promise<Object>} User profile data
  */
-export async function getUserProfile(token, userId) {
+export async function getProfile() {
   try {
+    const token = localStorage.getItem('token')
+    const userId = localStorage.getItem('userId')
     const response = await fetch(`${API_URL}/users/${userId}`, {
-      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${token}`
       }
     })
 
     const data = await response.json()
-
     if (!response.ok) {
+      handleAuthErrors(response, data)
       throw new Error(data.message || 'Failed to fetch user profile')
     }
-
     return data
   } catch (error) {
-    console.error('Get user profile error:', error)
+    console.error('Get profile error:', error)
     throw error
   }
 }
@@ -107,26 +119,27 @@ export async function getUserProfile(token, userId) {
  * @param {Object} updateData - Data to update
  * @returns {Promise<Object>} Update response
  */
-export async function updateUserProfile(token, userId, updateData) {
+export async function updateProfile(updateData) {
   try {
+    const token = localStorage.getItem('token')
+    const userId = localStorage.getItem('userId')
     const response = await fetch(`${API_URL}/users/${userId}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify(updateData)
     })
 
     const data = await response.json()
-
     if (!response.ok) {
+      handleAuthErrors(response, data)
       throw new Error(data.message || 'Failed to update user profile')
     }
-
-    return data
+    return data // expected: { message, user }
   } catch (error) {
-    console.error('Update user profile error:', error)
+    console.error('Update profile error:', error)
     throw error
   }
 }
@@ -137,22 +150,23 @@ export async function updateUserProfile(token, userId, updateData) {
  * @param {string} userId - User's ID
  * @returns {Promise<Object>} Delete response
  */
-export async function deleteUserAccount(token, userId) {
+export async function deleteAccount() {
   try {
+    const token = localStorage.getItem('token')
+    const userId = localStorage.getItem('userId')
     const response = await fetch(`${API_URL}/users/${userId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${token}`
       }
     })
 
+    const data = await response.json()
     if (!response.ok) {
-      const data = await response.json()
+      handleAuthErrors(response, data)
       throw new Error(data.message || 'Failed to delete account')
     }
-
-    return { success: true }
+    return data // { message: "Account deleted successfully" }
   } catch (error) {
     console.error('Delete account error:', error)
     throw error

@@ -27,6 +27,12 @@ async function login() {
     
     // Set user data
     setLoggedUser(data)
+    // Persist explicitly for clarity (apiFunctions may not persist)
+    if (data?.token && data?.id) {
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('userId', data.id)
+      window.dispatchEvent(new CustomEvent('localStorageChanged'))
+    }
     
     // Check if user is base_user
     if (data.userType === 'base_user') {

@@ -2,7 +2,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { loggedUser, setLoggedUser, clearLoggedUser } from '../states/loggedUser.js'
-import { getUserProfile, updateUserProfile, validateEmail, validatePassword } from '../states/apiFunctions.js'
+import { getProfile, updateProfile, deleteAccount as apiDeleteAccount, validateEmail, validatePassword } from '../states/apiFunctions.js'
 
 const router = useRouter()
 
@@ -35,10 +35,10 @@ async function loadProfile() {
 
   try {
     isLoading.value = true
-    const profileData = await getUserProfile(loggedUser.token, loggedUser.id)
+    const profileData = await getProfile()
     
-    // Update logged user with fresh data
-    setLoggedUser(profileData)
+    // Only update profile fields, keep token/id from storage
+    setLoggedUser({ ...loggedUser, ...profileData, token: loggedUser.token, id: loggedUser.id })
     
     // Populate edit form
     editData.name = profileData.name || ''
@@ -48,7 +48,12 @@ async function loadProfile() {
     editData.address = profileData.address || ''
   } catch (err) {
     console.error('Error loading profile:', err)
-    error.value = 'Errore nel caricamento del profilo'
+    if (err.message === 'Unauthorized') {
+      clearLoggedUser()
+      router.push('/login')
+      return
+    }
+    error.value = err.message || 'Errore nel caricamento del profilo'
   } finally {
     isLoading.value = false
   }
@@ -116,10 +121,11 @@ async function saveProfile() {
       updateData.newPassword = editData.newPassword
     }
     
-    const updatedData = await updateUserProfile(loggedUser.token, loggedUser.id, updateData)
+    const updatedData = await updateProfile(updateData)
     
-    // Update logged user with new data
-    setLoggedUser(updatedData)
+    // Backend returns { message, user }
+    const updatedUser = updatedData.user || updatedData
+    setLoggedUser({ ...loggedUser, ...updatedUser, token: loggedUser.token, id: loggedUser.id })
     
     success.value = 'Profilo aggiornato con successo!'
     isEditing.value = false
@@ -131,6 +137,11 @@ async function saveProfile() {
     
   } catch (err) {
     console.error('Error updating profile:', err)
+    if (err.message === 'Unauthorized') {
+      clearLoggedUser()
+      router.push('/login')
+      return
+    }
     error.value = err.message || 'Errore nell\'aggiornamento del profilo'
   } finally {
     isLoading.value = false
@@ -150,26 +161,19 @@ async function deleteAccount() {
   try {
     isLoading.value = true
     
-    // Call delete account API (you'll need to implement this in apiFunctions.js)
-    const response = await fetch(`${import.meta.env.VITE_API_HOST || 'http://localhost:8080'}/api/v1/users/${loggedUser.id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${loggedUser.token}`,
-        'Content-Type': 'application/json'
-      }
-    })
+    const res = await apiDeleteAccount()
     
-    if (!response.ok) {
-      throw new Error('Errore nell\'eliminazione dell\'account')
-    }
-    
-    // Clear user data and redirect
     clearLoggedUser()
     router.push('/')
-    alert('Account eliminato con successo')
+    alert(res?.message || 'Account eliminato con successo')
     
   } catch (err) {
     console.error('Error deleting account:', err)
+    if (err.message === 'Unauthorized') {
+      clearLoggedUser()
+      router.push('/login')
+      return
+    }
     error.value = err.message || 'Errore nell\'eliminazione dell\'account'
   } finally {
     isLoading.value = false
