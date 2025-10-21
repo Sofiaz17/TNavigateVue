@@ -4,14 +4,14 @@ import { useRouter } from 'vue-router'
 import { loggedUser, setLoggedUser, clearLoggedUser } from '../states/loggedUser.js'
 import { getCurrentUser, updateProfile, deleteAccount as apiDeleteAccount, validateEmail, validatePassword, createShop, getMyShops, updateShop as apiUpdateShop, deleteShop as apiDeleteShop } from '../states/apiFunctions.js'
 import { categories, fetchCategories } from '../states/shops.js'
-import { favorites, loadFavorites, removeFromFavorites, isFavorite } from '../states/favorites.js'
+import { favorites, loadFavorites, removeFromFavorites, isFavorite, isLoading as favoritesLoading, error as favoritesError, syncFavorites } from '../states/favorites.js'
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 const router = useRouter()
 
 const isEditing = ref(false)
-const isLoading = ref(false)
-const error = ref('')
+const profileLoading = ref(false)
+const profileError = ref('')
 const success = ref('')
 
 // Shop owner state
@@ -82,8 +82,8 @@ async function loadProfile() {
   }
 
   try {
-    isLoading.value = true
-    error.value = ''
+    profileLoading.value = true
+    profileError.value = ''
     const profileData = await getCurrentUser()
     
     // Update user state with fresh data from backend
@@ -103,9 +103,9 @@ async function loadProfile() {
       router.push('/login')
       return
     }
-    error.value = err.message || 'Errore nel caricamento del profilo'
+    profileError.value = err.message || 'Errore nel caricamento del profilo'
   } finally {
-    isLoading.value = false
+    profileLoading.value = false
   }
 }
 
@@ -330,8 +330,8 @@ async function saveProfile() {
     return
   }
   
-  isLoading.value = true
-  error.value = ''
+  profileLoading.value = true
+  profileError.value = ''
   success.value = ''
   
   try {
@@ -370,9 +370,9 @@ async function saveProfile() {
       router.push('/login')
       return
     }
-    error.value = err.message || 'Errore nell\'aggiornamento del profilo'
+    profileError.value = err.message || 'Errore nell\'aggiornamento del profilo'
   } finally {
-    isLoading.value = false
+    profileLoading.value = false
   }
 }
 
@@ -387,7 +387,7 @@ async function deleteAccount() {
   }
   
   try {
-    isLoading.value = true
+    profileLoading.value = true
     
     const res = await apiDeleteAccount()
     
@@ -402,9 +402,9 @@ async function deleteAccount() {
       router.push('/login')
       return
     }
-    error.value = err.message || 'Errore nell\'eliminazione dell\'account'
+    profileError.value = err.message || 'Errore nell\'eliminazione dell\'account'
   } finally {
-    isLoading.value = false
+    profileLoading.value = false
   }
 }
 
@@ -418,7 +418,7 @@ function logout() {
 function cancelEdit() {
   isEditing.value = false
   errors.value = {}
-  error.value = ''
+  profileError.value = ''
   success.value = ''
   
   // Reset form data
@@ -433,11 +433,20 @@ function cancelEdit() {
 }
 
 // Remove from favorites function
-function removeFromFavoritesList(shop) {
+async function removeFromFavoritesList(shop) {
   try {
-    removeFromFavorites(shop)
+    await removeFromFavorites(shop)
   } catch (error) {
     console.error('Error removing from favorites:', error)
+  }
+}
+
+// Sync favorites with backend
+async function refreshFavorites() {
+  try {
+    await syncFavorites()
+  } catch (error) {
+    console.error('Error syncing favorites:', error)
   }
 }
 
@@ -475,12 +484,12 @@ onMounted(() => {
       </div>
     </div>
 
-    <div v-if="isLoading" class="loading">
+    <div v-if="profileLoading" class="loading">
       Caricamento...
     </div>
 
-    <div v-else-if="error" class="error-message">
-      {{ error }}
+    <div v-else-if="profileError" class="error-message">
+      {{ profileError }}
     </div>
 
     <div v-else-if="success" class="success-message">
@@ -520,8 +529,28 @@ onMounted(() => {
 
       <!-- Favorites Section -->
       <div class="favorites-section">
-        <h3>I miei negozi preferiti</h3>
-        <div v-if="favorites.length === 0" class="no-favorites-message">
+        <div class="favorites-header">
+          <h3>I miei negozi preferiti</h3>
+          <button 
+            @click="refreshFavorites" 
+            class="sync-btn"
+            :disabled="favoritesLoading.favorites"
+            title="Sincronizza con il server"
+          >
+            {{ favoritesLoading.favorites ? 'Sincronizzazione...' : 'Sincronizza' }}
+          </button>
+        </div>
+        
+        <div v-if="favoritesError.favorites" class="error-message">
+          <p> Errore nel caricamento dei preferiti: {{ favoritesError.favorites }}</p>
+          <p>I dati mostrati provengono dalla cache locale.</p>
+        </div>
+        
+        <div v-if="favoritesLoading.favorites" class="loading">
+          Caricamento preferiti...
+        </div>
+        
+        <div v-else-if="favorites.length === 0" class="no-favorites-message">
           <p>Non hai ancora aggiunto nessun negozio ai preferiti.</p>
           <p>Visita la sezione <router-link to="/shops">Indice negozi</router-link> per iniziare a esplorare!</p>
         </div>
@@ -533,9 +562,10 @@ onMounted(() => {
               <button 
                 @click="removeFromFavoritesList(shop)" 
                 class="remove-favorite-btn"
-                title="Rimuovi dai preferiti"
+                :disabled="favoritesLoading.remove"
+                :title="favoritesLoading.remove ? 'Rimozione in corso...' : 'Rimuovi dai preferiti'"
               >
-                ⭐
+                {{ favoritesLoading.remove ? '⏳' : '⭐' }}
               </button>
             </div>
             <div class="favorite-body">
@@ -834,10 +864,10 @@ onMounted(() => {
       <div class="form-actions">
         <button 
           type="submit" 
-          :disabled="isLoading"
+          :disabled="profileLoading"
           class="save-btn"
         >
-          {{ isLoading ? 'Salvataggio...' : 'Salva Modifiche' }}
+          {{ profileLoading ? 'Salvataggio...' : 'Salva Modifiche' }}
         </button>
         
         <button 
@@ -855,7 +885,7 @@ onMounted(() => {
       <p>Elimina definitivamente il tuo account. Questa azione non può essere annullata.</p>
       <button 
         @click="deleteAccount"
-        :disabled="isLoading"
+        :disabled="profileLoading"
         class="delete-btn"
       >
         Elimina Account
@@ -1231,11 +1261,38 @@ input.error {
   margin-bottom: 2rem;
 }
 
-.favorites-section h3 {
-  color: #333;
+.favorites-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid #e9ecef;
+}
+
+.favorites-header h3 {
+  color: #333;
+  margin: 0;
+}
+
+.sync-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s ease;
+}
+
+.sync-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.sync-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
 }
 
 .no-favorites-message {
@@ -1302,9 +1359,15 @@ input.error {
   text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
 }
 
-.remove-favorite-btn:hover {
+.remove-favorite-btn:hover:not(:disabled) {
   transform: scale(1.1);
   background-color: rgba(255, 215, 0, 0.1);
+}
+
+.remove-favorite-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .favorite-body {

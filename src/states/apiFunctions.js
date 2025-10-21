@@ -377,3 +377,123 @@ export async function deleteShop(shopSelf) {
     throw error
   }
 }
+
+// ===== FAVORITES API FUNCTIONS =====
+
+/**
+ * Get user's favorite shops from backend
+ * @returns {Promise<Array>} Array of favorite shops
+ */
+export async function getFavorites() {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      throw new Error('No authentication token found')
+    }
+    
+    const response = await fetch(`${API_URL}/users/me/favorites`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const data = await response.json()
+    handleAuthErrors(response, data)
+    return data.favorites || []
+  } catch (error) {
+    console.error('Get favorites error:', error)
+    throw error
+  }
+}
+
+/**
+ * Add shop to user's favorites
+ * @param {string} shopId - Shop ID to add to favorites
+ * @returns {Promise<Object>} API response
+ */
+export async function addFavorite(shopId) {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      throw new Error('No authentication token found')
+    }
+    
+    const response = await fetch(`${API_URL}/users/me/favorites`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ shop_id: shopId })
+    })
+
+    const data = await response.json()
+    handleAuthErrors(response, data)
+    return data
+  } catch (error) {
+    console.error('Add favorite error:', error)
+    throw error
+  }
+}
+
+/**
+ * Remove shop from user's favorites
+ * @param {string} shopId - Shop ID to remove from favorites
+ * @returns {Promise<Object>} API response
+ */
+export async function removeFavorite(shopId) {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      throw new Error('No authentication token found')
+    }
+    
+    const response = await fetch(`${API_URL}/users/me/favorites/${shopId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    const data = await response.json()
+    handleAuthErrors(response, data)
+    return data
+  } catch (error) {
+    console.error('Remove favorite error:', error)
+    throw error
+  }
+}
+
+/**
+ * Check if shop is in user's favorites
+ * @param {string} shopId - Shop ID to check
+ * @returns {Promise<boolean>} Whether shop is favorited
+ */
+export async function isShopFavorited(shopId) {
+  try {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      return false
+    }
+    
+    const response = await fetch(`${API_URL}/users/me/favorites/${shopId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (response.status === 404) {
+      return false
+    }
+    
+    const data = await response.json()
+    handleAuthErrors(response, data)
+    return true
+  } catch (error) {
+    console.error('Check favorite error:', error)
+    return false
+  }
+}

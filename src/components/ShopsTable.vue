@@ -43,7 +43,7 @@ async function toggleCategories() {
 }
 
 // Favorites functions
-function toggleFavorite(shop) {
+async function toggleFavorite(shop) {
   if (!loggedUser.token || !loggedUser.id) {
     // User not logged in, redirect to login with message
     router.push({
@@ -55,9 +55,9 @@ function toggleFavorite(shop) {
   
   try {
     if (isFavorite(shop)) {
-      removeFromFavorites(shop)
+      await removeFromFavorites(shop.id)
     } else {
-      addToFavorites(shop)
+      await addToFavorites(shop.id)
     }
   } catch (error) {
     console.error('Error toggling favorite:', error)
