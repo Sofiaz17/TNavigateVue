@@ -28,7 +28,7 @@ app.use(createBootstrap({components: true, directives: true}))
 app.use(router)
 
 app.config.errorHandler = (err, instance, info) => {
-console.error('Error: ' + err +', Info: ' + info +', Instance: ' + + (instance?.type?.name || 'Unknown'));
+console.error('Error: ' + err +', Info: ' + info +', Instance: ' + (instance?.$?.type?.name || instance?.$?.type?.displayName || 'Unknown'));
 };
 
 // Validate and restore user session on app startup
