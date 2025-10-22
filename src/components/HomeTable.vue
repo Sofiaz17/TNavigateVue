@@ -5,20 +5,21 @@ import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, isCa
 import { /*getRoute,*/ seeShops, markers, setEndingPoint,clearWaypoints, setWaypoints, /*, clearMarkers */endingPoint, clearEndingPoint} from '@/states/mapsFunctions.js'
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
+import { BListGroup, BListGroupItem, BButton, BCollapse } from 'bootstrap-vue-next'
 
 const mapRef = ref(null);
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 //export
-const visible = ref([false])
+const visible = ref([])
 //const markers = ref([]);
 
 
 onMounted( () => {
   //fetchShops() // fetch on init
   console.log('onMounted: called' );
-  markers.value.forEach((marker)=>console.log('MARKERS: '+marker.position));
+  markers.value?.forEach((marker)=>console.log('MARKERS: '+marker.position));
   clearShops();
   clearSearchSC();
   clearWarning();
@@ -27,10 +28,17 @@ onMounted( () => {
   
  // clearMarkers();
   //reinitializeMap();
-  console.log('MARKERS: ' + markers.value.position);
+  console.log('MARKERS: ' + JSON.stringify(markers.value));
 
 
 });
+
+// Watch for changes in shops and initialize visible array
+watch(() => shops, (newShops) => {
+  if (newShops && newShops.length > 0) {
+    visible.value = new Array(newShops.length).fill(false);
+  }
+}, { immediate: true });
 
 
 
@@ -62,8 +70,8 @@ const toggleVisibility= (index)  => {
     <span style="color: red">{{warningMessage}}</span>
     <BListGroup class="b-list-group">
       <BListGroupItem
-        v-for="(shop, index) in shops.value" :key="shop.self"
-        v-if="shops.value.length !== undefined"
+        v-for="(shop, index) in shops" :key="shop.self"
+        v-if="shops && shops.length > 0"
         class="b-list-group-item"
       >
         <li>

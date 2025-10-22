@@ -1,6 +1,7 @@
-import { reactive, warn } from 'vue'
+import { reactive, ref, warn } from 'vue'
 import { warningMessage } from './searchFunctions'
 import { seeShops } from './mapsFunctions'
+import { loggedUser } from './loggedUser'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 //const HOST = `http://localhost:3000`
@@ -45,7 +46,7 @@ async function fetchShopsCateg(category){
     if(!response.ok){
         console.error('Error: ', response.statusText);
         warningMessage.value = 'Nessun negozio in questa categoria';
-        while(shops.value.length > 0){
+        while(shops.value?.length > 0){
             //console.log('POPPING: '  + 'length: ' + markers.value.length + ': '+markers.value);
             shops.value.pop();
         }
@@ -86,11 +87,29 @@ async function fetchShopDetails(shopSelfUrl) {
 
 async function updateCoordinates(coordinates, self) {
     console.log('updating coordinates');
-    let response = await fetch(HOST+self, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify( { coordinates: coordinates } ),
-    })
+    
+    // Check if user is logged in and has admin privileges
+    if (!loggedUser.token || loggedUser.userType !== 'admin') {
+        console.log('User not authorized to update coordinates');
+        return;
+    }
+    
+    try {
+        let response = await fetch(HOST+self, {
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${loggedUser.token}`
+            },
+            body: JSON.stringify( { coordinates: coordinates } ),
+        });
+        
+        if (!response.ok) {
+            console.error('Failed to update coordinates:', response.status, response.statusText);
+        }
+    } catch (error) {
+        console.error('Error updating coordinates:', error);
+    }
 };
 
 

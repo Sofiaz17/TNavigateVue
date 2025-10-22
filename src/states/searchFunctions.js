@@ -51,7 +51,7 @@ async function searchShopfromCat(category){
     await fetchShopsCateg(category);
     warningMessage.value = '';
     console.log('searchShopfromCat: ' + shops.value);
-    if(shops.value.length === 0){
+    if(shops.value?.length === 0){
       warningMessage.value = 'Nessun risultato';
       
     }
@@ -125,9 +125,9 @@ async function searchShopByName(categToSearch){
         try{
           await fetchShopsName(capitalizeFirstLetter(searchSC.value));
                 //console.log('shops.value: ' + shops.value[0].name);
-                console.log('shops.value.length: ' + shops.value.length);
+                console.log('shops.value.length: ' + (shops.value?.length || 0));
                 
-          if(shops.value.length == undefined){
+          if(shops.value?.length == undefined){
             warningMessage.value = 'Nessun risultato';
             return;
           }
@@ -153,12 +153,20 @@ async function searchShopByProduct(categToSearch){
  try{
     console.log('SEARCHBYPROD categtosearch: ' + categToSearch);
     if(categToSearch==undefined){
-        categToSearch = await prodCategory();
-            console.log('categToSearch value:'+ categToSearch);
-            console.log('PROD searchSC.value:'+ searchSC.value);
+        const prodCats = await prodCategory();
+        console.log('categToSearch value:'+ prodCats);
+        console.log('PROD searchSC.value:'+ searchSC.value);
+        
+        if(prodCats && prodCats.length > 0) {
+            // Use the first category found
+            categToSearch = prodCats[0];
+        } else {
+            warningMessage.value = 'Nessun risultato';
+            return;
+        }
    } 
-    console.log('PROD, products.value.length: ' + products.value.length);
-    if(products.value.length === 0){
+    console.log('PROD, products.value.length: ' + (products.value?.length || 0));
+    if(products.value?.length === 0){
         warningMessage.value = 'Nessun risultato';
         return;
     }
@@ -179,9 +187,9 @@ async function prodCategory(){
         await fetchProdName(searchSC.value.toLowerCase());
         console.log('products: ' + products.value);
         console.log('products.value[0]: ' + products.value[0]);
-        if(products.value.length === 0){
+        if(products.value?.length === 0){
             warningMessage.value = 'Nessun risultato';
-            return;
+            return [];
         }
         warningMessage.value = ''; 
         console.log('products.category: ' + products.category); 
@@ -191,6 +199,7 @@ async function prodCategory(){
         return prodCats;
       } catch(error){
           console.log('error: ' + error);
+          return [];
         }
     }
 

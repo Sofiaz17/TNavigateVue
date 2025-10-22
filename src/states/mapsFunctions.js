@@ -19,13 +19,13 @@ async function clearEndingPoint(){
 
 
 async function clearWaypoints(){
-  while (waypoints.value.length > 0) {
+  while (waypoints.value?.length > 0) {
     waypoints.value.pop();
   }
 }
 
 async function clearRouteDuration(){
-  while (routeDuration.value.length > 0) {
+  while (routeDuration.value?.length > 0) {
     routeDuration.value.pop();
   }
 }
@@ -35,8 +35,8 @@ async function clearRouteDuration(){
 async function seeShops() {
     try {
         // Clear existing markers
-        if(waypoints.value.length==0){
-        while (markers.value.length > 0) {
+        if(waypoints.value?.length == 0){
+        while (markers.value?.length > 0) {
             markers.value.pop();
         }
       }
@@ -67,9 +67,12 @@ async function seeShops() {
 
             console.log('COORD BEFORE:', position.lat, position.lng);
 
-            await updateCoordinates([position.lat, position.lng], shopSelf);
+            // Update coordinates asynchronously without blocking
+            updateCoordinates([position.lat, position.lng], shopSelf).catch(error => {
+                console.log('Coordinate update failed (non-blocking):', error);
+            });
 
-            console.log('Updated coordinates for shop:', shopSelf);
+            console.log('Processing coordinates for shop:', shopSelf);
         }
 
         markers.value.forEach((marker) => console.log('MARKER:', marker.position));

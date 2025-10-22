@@ -5,10 +5,11 @@
   import { clearWarning, warningMessage } from '@/states/searchFunctions'
   import myPin from '@/components/icons/myPin.png'
 
-  watch(markers, (oldMarkers, newMarkers) =>{
-    console.log('WATCHING...');
-    clearMarkers();
-  } )
+  // Removed problematic watcher that was clearing markers
+  // watch(markers, (oldMarkers, newMarkers) =>{
+  //   console.log('WATCHING...');
+  //   clearMarkers();
+  // } )
 
 
   const props = defineProps({
@@ -52,7 +53,7 @@
         console.log('marker.setMap:' + mapObject.markers);
         
       });
-      clearMarkers();
+      // Removed clearMarkers() call that was interfering with marker display
       clearRouteDuration();
    
       
@@ -61,9 +62,9 @@
   //clears map from markers
   function clearMarkers(){
    
-    console.log('WAYPOINTS IN CLEAR: ' + waypoints.value.length);
-    if(waypoints.value.length==0){
-      if(markers.value.length!=0){
+    console.log('WAYPOINTS IN CLEAR: ' + (waypoints.value?.length || 0));
+    if(waypoints.value?.length === 0){
+      if(markers.value?.length !== 0){
       markers.value = [];
       console.log('markers before: ' + markers.value);
       //markers.value.forEach((marker)=> marker.setMap(null))
@@ -298,7 +299,7 @@ function durationToNumber(str) {
 
 //gets coordinates of destination
 function getDestination() {
-  const lastWaypoint = waypoints.value[waypoints.value.length - 1];
+  const lastWaypoint = waypoints.value?.[waypoints.value.length - 1];
   const coords = lastWaypoint.split(' / ')[2].split(',');
   return {
     location: {
@@ -389,7 +390,7 @@ onBeforeUnmount(() => {
 <template>
   <div>
     
-     <form @submit.prevent="getRoute" v-if="waypoints.length==0">
+     <form @submit.prevent="getRoute" v-if="waypoints?.length==0">
       <div>
         <label for="start-point">Partenza: <i>la tua posizione</i></label>
       </div>
@@ -405,14 +406,14 @@ onBeforeUnmount(() => {
         <label for="start-point">Partenza: <i>la tua posizione</i></label>
       </div>
       <div  v-for="(point, index) in waypoints">
-        <label v-if="index == waypoints.length-1" for="end-point">
-            Destinazione: <em> {{ waypoints[waypoints.length-1] }} </em>
+        <label v-if="index == waypoints?.length-1" for="end-point">
+            Destinazione: <em> {{ waypoints?.[waypoints?.length-1] }} </em>
               <br><em>Durata: {{ routeDuration[index] }}</em>
         </label>
         <label v-else for="way-point">Waypoint {{ index }}: <em> {{ point }} </em> Durata: {{ routeDuration[index] }}</label>
       </div>
       <!-- <div>
-        <label for="end-point">Destinazione: <em> {{ waypoints[waypoints.length-1] }} </em></label>
+        <label for="end-point">Destinazione: <em> {{ waypoints?.[waypoints?.length-1] }} </em></label>
        
       </div> -->
     

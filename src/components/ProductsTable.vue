@@ -5,11 +5,12 @@ import {clearWarning, clearSearchSC, clearShops, loadShops, loadCategories, sear
 import ViewInformation from '@/components/ViewInformation.vue'
 import GMap from '@/components/GMap.vue'
 import { seeShops, markers, setWaypoints,setEndingPoint, clearWaypoints, clearEndingPoint/*, clearMarkers */} from '@/states/mapsFunctions.js'
+import { BListGroup, BListGroupItem, BButton, BCollapse, BCard } from 'bootstrap-vue-next'
 
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 
-const visible = ref([false])
+const visible = ref([])
 
 onMounted( () => {
   //fetchShops() // fetch on init
@@ -22,6 +23,13 @@ onMounted( () => {
   fetchCategories();
   clearWaypoints();
 });
+
+// Watch for changes in shops and initialize visible array
+watch(() => shops, (newShops) => {
+  if (newShops && newShops.length > 0) {
+    visible.value = new Array(newShops.length).fill(false);
+  }
+}, { immediate: true });
 
 const toggleVisibility = (index) => {
   visible.value[index] = !visible.value[index]
@@ -45,7 +53,7 @@ const toggleVisibility = (index) => {
   <br/>
   <!-- <button @click="control()">control</button> -->
     <BListGroup class="b-list-group">
-     <BListGroupItem v-for="(shop, index) in shops.value" :key="shop.self" v-if="shops.value.length !== undefined " class="b-list-group-item">
+     <BListGroupItem v-for="(shop, index) in shops" :key="shop.self" v-if="shops && shops.length > 0" class="b-list-group-item">
         <li >
           <a :href="HOST+shop.self">{{shop.name}}</a> - {{ shop.address }} <br>
          
@@ -70,9 +78,9 @@ const toggleVisibility = (index) => {
     </BListGroup>
 
     <BCard>
-      <BListGroupItem v-for="(categ, index) in categories.value" :key="categ.self">
+      <BListGroupItem v-for="(categ, index) in categories" :key="categ.self">
         <h2 style="text-align: left;">{{ categ.name }} </h2>
-        <ul v-for="(prod, index) in products.value" :key="prod.self"  >
+        <ul v-for="(prod, index) in products" :key="prod.self"  >
           <li v-if="prod.category==categ.name">
             <a :href="HOST+prod.self">{{prod.name}}</a>
             <BButton @click="searchShopByProduct(prod.category)" style="margin-left:10px;" class="b-button"> Trova negozi! </BButton>
