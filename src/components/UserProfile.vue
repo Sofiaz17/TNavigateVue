@@ -3,8 +3,9 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { loggedUser, setLoggedUser, clearLoggedUser } from '../states/loggedUser.js'
 import { getCurrentUser, updateProfile, deleteAccount as apiDeleteAccount, validateEmail, validatePassword, createShop, getMyShops, updateShop as apiUpdateShop, deleteShop as apiDeleteShop } from '../states/apiFunctions.js'
-import { categories, fetchCategories } from '../states/shops.js'
+import { categories, fetchCategories, fetchShopDetails, shops } from '../states/shops.js'
 import { favorites, loadFavorites, removeFromFavorites, isFavorite, isLoading as favoritesLoading, error as favoritesError, syncFavorites } from '../states/favorites.js'
+import ViewInformation from './ViewInformation.vue'
 const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
 
 const router = useRouter()
@@ -23,10 +24,48 @@ const showAddShopForm = ref(false)
 
 const categoryOptions = ref([])
 
+// ViewInformation visibility state
+const visibleInfo = ref({})
+const detailedShops = ref({}) // Store detailed shop data
+
 const openingDays = ['LUN','MAR','MER','GIO','VEN','SAB','DOM']
 
 function createEmptyOpeningHours() {
   return openingDays.map(d => ({ day: d, state: 'closed', periods: [] }))
+}
+
+// Toggle visibility for ViewInformation component
+async function toggleInfoVisibility(shopId, shop) {
+  const isVisible = visibleInfo.value[shopId]
+  visibleInfo.value[shopId] = !isVisible
+  
+  // If we're showing the info and don't have detailed data yet, try to get it
+  if (!isVisible && !detailedShops.value[shopId]) {
+    // First, try to find the shop in the existing shops array
+    const existingShop = shops.value.find(s => 
+      s.self === shop.self || 
+      s._id === shop._id || 
+      s.id === shop.id ||
+      s.name === shop.name
+    )
+    
+    if (existingShop && existingShop.opening_hours) {
+      detailedShops.value[shopId] = existingShop
+    } else if (shop.self) {
+      // If not found in existing shops, try to fetch from API
+      try {
+        const detailedShop = await fetchShopDetails(HOST + shop.self)
+        detailedShops.value[shopId] = detailedShop
+      } catch (error) {
+        console.error('Error fetching shop details:', error)
+        // Fallback to original shop data if fetch fails
+        detailedShops.value[shopId] = shop
+      }
+    } else {
+      // No self URL available, use original shop data
+      detailedShops.value[shopId] = shop
+    }
+  }
 }
 
 const newShop = reactive({
@@ -573,7 +612,19 @@ onMounted(() => {
               <div><strong>Indirizzo:</strong> {{ shop.address }} {{ shop.civico }}, {{ shop.cap }} {{ shop.city }} ({{ shop.provincia }})</div>
               <div v-if="shop.information"><strong>Info:</strong> {{ shop.information }}</div>
               <div class="favorite-actions">
-                <a :href="HOST+shop.self" target="_blank" class="view-details-btn">Visualizza dettagli</a>
+                <button 
+                  :class="visibleInfo[shop.self || shop._id || shop.id] ? null : 'collapsed'"
+                  :aria-expanded="visibleInfo[shop.self || shop._id || shop.id] ? 'true' : 'false'"
+                  aria-controls="collapse-info"
+                  @click="toggleInfoVisibility(shop.self || shop._id || shop.id, shop)"
+                  class="view-details-btn">
+                  Visualizza dettagli
+                </button>
+                <div v-if="visibleInfo[shop.self || shop._id || shop.id]" class="shop-info-collapse">
+                  <ViewInformation 
+                    v-if="(detailedShops[shop.self || shop._id || shop.id] || shop) && typeof (detailedShops[shop.self || shop._id || shop.id] || shop) === 'object'" 
+                    :shop="detailedShops[shop.self || shop._id || shop.id] || shop" />
+                </div>
               </div>
             </div>
           </div>
@@ -1399,5 +1450,13 @@ input.error {
   background-color: #0056b3;
   text-decoration: none;
   color: white;
+}
+
+.shop-info-collapse {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-top: 10px;
+  background-color: #f8f9fa;
 }
 </style>

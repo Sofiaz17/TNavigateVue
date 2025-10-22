@@ -70,6 +70,20 @@ async function fetchProdName(prodName){
     products.value = await (await fetch(PRODUCT_URL + '?name=' + prodName)).json()
 }
 
+// Fetch individual shop details by self URL
+async function fetchShopDetails(shopSelfUrl) {
+    try {
+        const response = await fetch(shopSelfUrl)
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+        return await response.json()
+    } catch (error) {
+        console.error('Error fetching shop details:', error)
+        throw error
+    }
+}
+
 async function updateCoordinates(coordinates, self) {
     console.log('updating coordinates');
     let response = await fetch(HOST+self, {
@@ -80,4 +94,4 @@ async function updateCoordinates(coordinates, self) {
 };
 
 
-export { shops, categories, products, updateCoordinates, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName}
+export { shops, categories, products, updateCoordinates, fetchShops, fetchShopsName, fetchCategories, fetchShopsCateg, fetchProd, fetchProdName, fetchShopDetails}

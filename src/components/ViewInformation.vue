@@ -12,7 +12,13 @@ const props = defineProps({
 <template>
     <div v-if="shop">
       <h3>Orari di apertura</h3>
-      <ul>
+      
+      
+      <div v-if="!shop.opening_hours || !Array.isArray(shop.opening_hours) || shop.opening_hours.length === 0" style="color: #666; font-style: italic;">
+        Orari di apertura non disponibili
+      </div>
+      
+      <ul v-else>
         <li v-for="day in shop.opening_hours" :key="day.day">
           <strong>{{ day.day }}:</strong>
           <ul>
@@ -20,11 +26,11 @@ const props = defineProps({
                 chiuso    
             </li>
           </ul>
-          <ul v-for="period in day.periods" :key="period.startHours">
+          <ul v-if="day.periods && Array.isArray(day.periods)" v-for="period in day.periods" :key="period.startHours">
            
             <li >
-              {{ period.startHours }}:{{ period.startMinutes.toString().padStart(2, '0') }} - 
-              {{ period.endHours }}:{{ period.endMinutes.toString().padStart(2, '0') }}
+              {{ period.startHours || '00' }}:{{ (period.startMinutes || 0).toString().padStart(2, '0') }} - 
+              {{ period.endHours || '00' }}:{{ (period.endMinutes || 0).toString().padStart(2, '0') }}
             </li>
            
           </ul>
