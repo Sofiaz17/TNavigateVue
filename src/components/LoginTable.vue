@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { loggedUser, setLoggedUser, clearLoggedUser } from '../states/loggedUser.js'
-import { authenticateUser } from '../states/apiFunctions.js'
+import { authenticateUser, backendUrl } from '../states/apiFunctions.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -118,6 +118,14 @@ onMounted(() => {
       >
         {{ isLoading ? 'Accesso...' : 'Accedi' }}
       </button>
+
+      <div class="divider">
+        <span>OR</span>
+      </div>
+
+      <a :href="`${backendUrl}/api/v1/authentications/google/login`" class="google-login-btn">
+        Login with Google
+      </a>
       
       <div class="signup-link">
         <p>Non hai un account? <router-link to="/signup">Registrati qui</router-link></p>
@@ -198,7 +206,8 @@ input[type="password"]:focus {
 }
 
 .login-btn,
-.logout-btn {
+.logout-btn,
+.google-login-btn {
   width: 100%;
   padding: 0.75rem;
   background-color: #007bff;
@@ -208,6 +217,9 @@ input[type="password"]:focus {
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .login-btn:hover:not(:disabled) {
@@ -225,6 +237,37 @@ input[type="password"]:focus {
 
 .logout-btn:hover {
   background-color: #c82333;
+}
+
+.google-login-btn {
+  background-color: #db4437;
+  margin-top: 1rem;
+}
+
+.google-login-btn:hover {
+  background-color: #c23321;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+.divider:not(:empty)::before {
+  margin-right: .25em;
+}
+
+.divider:not(:empty)::after {
+  margin-left: .25em;
 }
 
 .signup-link {

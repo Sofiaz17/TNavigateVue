@@ -1,7 +1,7 @@
 // API functions for user registration and authentication
 
-const HOST = import.meta.env.VITE_API_HOST || `http://localhost:3000`
-const API_URL = HOST + `/api/v1`
+export const backendUrl = import.meta.env.VITE_API_HOST || `http://localhost:3000`;
+const API_URL = backendUrl + `/api/v1`
 const SHOPS_URL = API_URL + `/shops`
 
 /**
@@ -335,7 +335,7 @@ export async function updateShop(shopSelf, updateData) {
   try {
     if (!shopSelf) throw new Error('shopSelf is required')
     const token = localStorage.getItem('token')
-    const response = await fetch(`${HOST}${shopSelf}`, {
+    const response = await fetch(`${backendUrl}${shopSelf}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -362,7 +362,7 @@ export async function deleteShop(shopSelf) {
   try {
     if (!shopSelf) throw new Error('shopSelf is required')
     const token = localStorage.getItem('token')
-    const response = await fetch(`${HOST}${shopSelf}`, {
+    const response = await fetch(`${backendUrl}${shopSelf}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`

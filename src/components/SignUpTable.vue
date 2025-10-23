@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { registerUser, validateUserRegistration } from '../states/apiFunctions.js'
+import { registerUser, validateUserRegistration, backendUrl } from '../states/apiFunctions.js'
 
 const router = useRouter()
 
@@ -220,6 +220,19 @@ function resetForm() {
         <p>Hai già un account? <router-link to="/login">Accedi qui</router-link></p>
       </div>
     </form>
+
+    <div class="divider">
+      <span>OR</span>
+    </div>
+
+    <div class="google-signup">
+      <a :href="`${backendUrl}/api/v1/authentications/google/signup/base_user`" class="google-signup-btn">
+        Sign up as a Base User with Google
+      </a>
+      <a :href="`${backendUrl}/api/v1/authentications/google/signup/shop_owner`" class="google-signup-btn">
+        Sign up as a Shop Owner with Google
+      </a>
+    </div>
   </div>
 </template>
 
@@ -239,6 +252,52 @@ function resetForm() {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: #6c757d;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+.divider:not(:empty)::before {
+  margin-right: .5em;
+}
+
+.divider:not(:empty)::after {
+  margin-left: .5em;
+}
+
+.google-signup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.google-signup-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  background-color: #db4437;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+}
+
+.google-signup-btn:hover {
+  background-color: #c23321;
 }
 
 .user-type-selection {
