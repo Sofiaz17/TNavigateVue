@@ -17,24 +17,27 @@ onMounted(async () => {
   const token = route.query.token;
 
   if (token) {
+    // Store token in localStorage
     localStorage.setItem('token', token);
-    
+
+    // Small delay to ensure localStorage is updated
+    await new Promise(resolve => setTimeout(resolve, 100));
+
     try {
       // Fetch user details with the new token
       const user = await getCurrentUser();
-      
-      // Update the loggedUser state
-      setLoggedUser(user);
-      
+
+      // Update the loggedUser state - CRITICAL: include the token!
+      setLoggedUser({ ...user, token });
+
       // Redirect to profile page
       router.push('/profile');
     } catch (error) {
       console.error('Failed to fetch user after Google auth:', error);
-      router.push('/login?message=Authentication failed. Please try again.');
+      router.push('/login?message=Authentication failed');
     }
   } else {
-    // Handle error: no token
-    router.push('/login?message=Authentication failed. No token received.');
+    router.push('/login?message=No token received');
   }
 });
 </script>

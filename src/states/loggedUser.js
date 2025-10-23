@@ -6,7 +6,6 @@ const loggedUser = reactive({
     token: undefined,
     email: undefined,
     id: undefined,
-    self: undefined,
     userType: undefined,
     name: undefined,
     surname: undefined,
@@ -18,15 +17,14 @@ async function setLoggedUser (data) {
     loggedUser.token = data.token;
     loggedUser.email = data.email;
     loggedUser.id = data.id;
-    loggedUser.self = data.self;
     loggedUser.userType = data.userType;
     loggedUser.name = data.name;
     loggedUser.surname = data.surname;
     loggedUser.phone = data.phone;
     loggedUser.address = data.address;
-    
-    // Persist all user data in localStorage for session restoration
+
     if (data.token) {
+        // Persist to localStorage for session restoration
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.id);
         localStorage.setItem('userEmail', data.email || '');
@@ -35,17 +33,8 @@ async function setLoggedUser (data) {
         localStorage.setItem('userSurname', data.surname || '');
         localStorage.setItem('userPhone', data.phone || '');
         localStorage.setItem('userAddress', data.address || '');
-        
-        // Dispatch custom event to notify App.vue of localStorage change
+
         window.dispatchEvent(new CustomEvent('localStorageChanged'));
-        
-        // Load favorites for the logged in user
-        try {
-            const { loadFavorites } = await import('./favorites.js');
-            loadFavorites();
-        } catch (error) {
-            console.error('Error loading favorites on login:', error);
-        }
     }
 }
 
@@ -53,7 +42,6 @@ async function clearLoggedUser () {
     loggedUser.token = undefined;
     loggedUser.email = undefined;
     loggedUser.id = undefined;
-    loggedUser.self = undefined;
     loggedUser.userType = undefined;
     loggedUser.name = undefined;
     loggedUser.surname = undefined;
