@@ -316,6 +316,11 @@ export async function getMyShops() {
       }
     })
 
+    // Handle 404 Not Found separately: it means no shops owned, not an error
+    if (response.status === 404) {
+      return []
+    }
+
     const data = await response.json()
     handleAuthErrors(response, data)
     return Array.isArray(data) ? data : (data.items || [])
