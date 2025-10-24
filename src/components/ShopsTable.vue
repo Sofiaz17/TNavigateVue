@@ -89,10 +89,10 @@ async function toggleFavorite(shop) {
   
     <BListGroup>
      
-      <BListGroupItem v-for="categ in categories.value" :key="categ.self"  class="category-item">
+      <BListGroupItem v-for="categ in categories" :key="categ.self"  class="category-item">
         <div @click="searchShopfromCat(categ.name)">{{ categ.name }}</div>
-        <ul v-for="(shop, index) in shops.value" :key="shop.self">
-          <li v-if="shops.value[0].category == categ.name">
+        <ul v-if="shops.length > 0 && shops[0].category == categ.name">
+          <li v-for="(shop, index) in shops" :key="shop.self" >
             <div class="shop-name-row">
               <a :href="HOST+shop.self">{{shop.name}}</a>
               <button 

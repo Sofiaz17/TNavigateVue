@@ -43,6 +43,12 @@ async function fetchCategories(){
 async function fetchShopsCateg(category){
    // shops.value = await (await fetch(SHOPS_URL + '?category=' + category)).json()
     let response = await fetch(SHOPS_URL + '?category=' + category);
+    if (response.status === 404) {
+        shops.value = [];
+        markers.value = [];
+        warningMessage.value = 'Nessun negozio in questa categoria';
+        return;
+    }
     if(!response.ok){
         console.error('Error: ', response.statusText);
         warningMessage.value = 'Nessun negozio in questa categoria';
