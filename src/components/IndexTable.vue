@@ -63,7 +63,7 @@ async function toggleShops() {
     </BButton>
     <BCollapse id="collapse-4" v-model="visible" class="b-collapse mt-2">
       <ul>
-        <li v-for="(shop,index) in shops.value" :key="shop.self">
+        <li v-for="(shop,index) in shops" :key="shop.self">
           <a :href="HOST+shop.self">{{shop.name}}</a> - {{ shop.address }} <br>
           <BButton
             :class="visible1[index] ? null : 'collapsed'"
