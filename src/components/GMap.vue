@@ -314,6 +314,10 @@ function getDestination() {
 //POST request for route with waypoints
 async function getMultipointRoute() {
   try {
+    if (waypoints.value?.length === 0) {
+      console.error('No waypoints set!');
+      return;
+    }
     await geolocate();
     console.log(
       'GET ROUTE: start' + center.value.lat + ' ,' + center.value.lng
@@ -399,7 +403,7 @@ onBeforeUnmount(() => {
        
       </div>
      
-      <button type="submit" class="b-button">Calcola percorso</button>
+      <button type="submit" class="b-button" :disabled="!endingPoint">Calcola percorso</button>
     </form>
    <form @submit.prevent="getMultipointRoute" v-else>
       <div>
@@ -419,7 +423,7 @@ onBeforeUnmount(() => {
     
       <button type="submit" class="b-button">Calcola percorso</button>
     </form>
-    <button @click='getMultipointRoute()' class="b-button"> Multipoint route </button>
+    <button v-if="waypoints?.length > 0" @click='getMultipointRoute()' class="b-button"> Multipoint route </button>
   <GMapMap
     ref="mapRef"
     :center="mycenter"
