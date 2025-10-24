@@ -10,9 +10,9 @@ const SHOPS_URL = API_URL+'/shops'
 const CATEG_URL = API_URL+'/shopCategories'
 const PRODUCT_URL = API_URL+ '/products'
 
-const shops = reactive([])
-const categories = reactive([])
-const products = reactive([])
+const shops = ref([])
+const categories = ref([])
+const products = ref([])
 
 console.log('HOST_URL: ' + HOST);
 

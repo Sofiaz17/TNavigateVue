@@ -53,7 +53,7 @@ const toggleVisibility = (index) => {
   <br/>
   <!-- <button @click="control()">control</button> -->
     <BListGroup class="b-list-group">
-     <BListGroupItem v-for="(shop, index) in shops" :key="shop.self" v-if="shops && shops.length > 0" class="b-list-group-item">
+     <BListGroupItem v-for="(shop, index) in shops" :key="shop.self" v-if="shops.value && shops.value.length > 0" class="b-list-group-item">
         <li >
           <a :href="HOST+shop.self">{{shop.name}}</a> - {{ shop.address }} <br>
          
