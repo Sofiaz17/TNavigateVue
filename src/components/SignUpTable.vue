@@ -222,15 +222,17 @@ function resetForm() {
     </form>
 
     <div class="divider">
-      <span>OR</span>
+      <span>oppure</span>
     </div>
 
     <div class="google-signup">
       <a :href="`${backendUrl}/api/v1/authentications/google/signup/base_user`" class="google-signup-btn">
-        Sign up as a Base User with Google
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="google-logo"/>
+        Registrati come Utente Base con Google
       </a>
       <a :href="`${backendUrl}/api/v1/authentications/google/signup/shop_owner`" class="google-signup-btn">
-        Sign up as a Shop Owner with Google
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="google-logo"/>
+        Registrati come Proprietario Negozio con Google
       </a>
     </div>
   </div>
@@ -285,19 +287,28 @@ function resetForm() {
 
 .google-signup-btn {
   padding: 0.75rem 1.5rem;
-  border: none;
+  border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  background-color: #db4437;
-  color: white;
+  background-color: white;
+  color: #444;
   text-align: center;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .google-signup-btn:hover {
-  background-color: #c23321;
+  background-color: #f5f5f5;
+}
+
+.google-logo {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
 }
 
 .user-type-selection {
@@ -388,12 +399,12 @@ input.error {
 }
 
 .submit-btn {
-  background-color: #007bff;
+  background-color: #006890;
   color: white;
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #0056b3;
+  background-color: #84B824;
 }
 
 .submit-btn:disabled {

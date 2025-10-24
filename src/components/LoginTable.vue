@@ -120,11 +120,12 @@ onMounted(() => {
       </button>
 
       <div class="divider">
-        <span>OR</span>
+        <span>oppure</span>
       </div>
 
       <a :href="`${backendUrl}/api/v1/authentications/google/login`" class="google-login-btn">
-        Login with Google
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google logo" class="google-logo"/>
+        Login con Google
       </a>
       
       <div class="signup-link">
@@ -210,7 +211,6 @@ input[type="password"]:focus {
 .google-login-btn {
   width: 100%;
   padding: 0.75rem;
-  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 4px;
@@ -222,8 +222,12 @@ input[type="password"]:focus {
   display: inline-block;
 }
 
+.login-btn {
+  background-color: #006890;
+}
+
 .login-btn:hover:not(:disabled) {
-  background-color: #0056b3;
+  background-color: #84B824;
 }
 
 .login-btn:disabled {
@@ -240,12 +244,23 @@ input[type="password"]:focus {
 }
 
 .google-login-btn {
-  background-color: #db4437;
+  background-color: white;
+  color: #444;
+  border: 1px solid #ddd;
   margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .google-login-btn:hover {
-  background-color: #c23321;
+  background-color: #f5f5f5;
+}
+
+.google-logo {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
 }
 
 .divider {

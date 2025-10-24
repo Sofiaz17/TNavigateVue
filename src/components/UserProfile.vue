@@ -982,7 +982,7 @@ onMounted(() => {
 }
 
 .edit-btn {
-  background-color: #007bff;
+  background-color: #006890;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -993,7 +993,7 @@ onMounted(() => {
 }
 
 .edit-btn:hover {
-  background-color: #0056b3;
+  background-color: #84B824;
 }
 
 .logout-btn {
@@ -1164,12 +1164,12 @@ input.error {
 }
 
 .save-btn {
-  background-color: #28a745;
+  background-color: #006890;
   color: white;
 }
 
 .save-btn:hover:not(:disabled) {
-  background-color: #218838;
+  background-color: #84B824;
 }
 
 .save-btn:disabled {
@@ -1265,7 +1265,7 @@ input.error {
 
 /* Style for "Aggiungi il tuo shop" and "Chiudi" buttons to match "Modifica Profilo" */
 .add-shop-btn {
-  background-color: #007bff;
+  background-color: #006890;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -1276,12 +1276,12 @@ input.error {
 }
 
 .add-shop-btn:hover {
-  background-color: #0056b3;
+  background-color: #84B824;
 }
 
 /* Style for "Modifica" button to match "Modifica Profilo" */
 .small {
-  background-color: #007bff;
+  background-color: #006890;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -1293,7 +1293,7 @@ input.error {
 }
 
 .small:hover {
-  background-color: #0056b3;
+  background-color: #84B824;
 }
 
 /* Style for "Elimina" button to match "Logout" and "Elimina Account" */
@@ -1336,7 +1336,7 @@ input.error {
 }
 
 .sync-btn {
-  background-color: #007bff;
+  background-color: #006890;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -1347,7 +1347,7 @@ input.error {
 }
 
 .sync-btn:hover:not(:disabled) {
-  background-color: #0056b3;
+  background-color: #84B824;
 }
 
 .sync-btn:disabled {
@@ -1445,7 +1445,7 @@ input.error {
 }
 
 .view-details-btn {
-  background-color: #007bff;
+  background-color: #006890;
   color: white;
   text-decoration: none;
   padding: 0.5rem 1rem;
@@ -1456,7 +1456,7 @@ input.error {
 }
 
 .view-details-btn:hover {
-  background-color: #0056b3;
+  background-color: #84B824;
   text-decoration: none;
   color: white;
 }
