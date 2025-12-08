@@ -58,3 +58,19 @@ Notes & tips
 - The app uses Vite + Vue 3. Scripts available in `package.json` are `dev`, `build` and `preview`.
 - Google Maps requests in the code read `import.meta.env.VITE_API_KEY`. Keep the key secret and follow Google Cloud best practices (restrict by referrer/IP and use billing controls).
 - If your backend exposes APIs that require authentication, ensure it sets `VITE_API_HOST` to the correct base URL.
+
+## Backend
+TNavigate: https://github.com/Sofiaz17/TNavigate.git
+
+## Development Methodology
+
+This project was developed following Agile methodology, using iterative sprint-based planning to ensure continuous delivery and rapid feedback.
+Key Agile practices used during development:
+
+- Sprint planning & iteration cycles - Work was organized in short, incremental sprints to keep progress measurable and predictable.
+
+- User story–driven tasks - Features for shops, products, authentication, and testing were defined as user stories with clear acceptance criteria.
+
+- Frequent reviews & retrospectives - Each sprint concluded with review meetings to evaluate completed features and retrospectives to refine the workflow.
+
+- Continuous integration & automated testing - The Jest + Supertest suite provided automated verification for every sprint increment.
